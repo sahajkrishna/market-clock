@@ -4,20 +4,26 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Label } from "@/components/ui/label";
+import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { usePreferences } from "@/hooks/usePreferences";
 import { FOREX_SESSIONS } from "@/lib/forex-sessions";
 import { getCommonTimezones, getDetectedTimezone } from "@/lib/preferences";
 import { requestNotificationPermission } from "@/lib/notifications";
-import { Globe, Bell, Clock, TrendingUp } from "lucide-react";
+import { supabase } from "@/integrations/supabase/client";
+import { Globe, Bell, Clock, TrendingUp, Mail } from "lucide-react";
+import { useToast } from "@/hooks/use-toast";
 
 const Onboarding = () => {
   const navigate = useNavigate();
   const { prefs, updatePrefs } = usePreferences();
+  const { toast } = useToast();
   const [timezone, setTimezone] = useState(prefs.timezone || getDetectedTimezone());
   const [selectedSessions, setSelectedSessions] = useState<string[]>(prefs.selectedSessions);
   const [alertMinutes, setAlertMinutes] = useState(String(prefs.alertMinutesBefore));
+  const [email, setEmail] = useState("");
   const [step, setStep] = useState(0);
+  const [saving, setSaving] = useState(false);
 
   const toggleSession = (id: string) => {
     setSelectedSessions((prev) =>
@@ -26,14 +32,31 @@ const Onboarding = () => {
   };
 
   const handleComplete = async () => {
-    await requestNotificationPermission();
-    updatePrefs({
-      timezone,
-      selectedSessions,
-      alertMinutesBefore: parseInt(alertMinutes),
-      onboardingComplete: true,
-    });
-    navigate("/dashboard");
+    setSaving(true);
+    try {
+      await requestNotificationPermission();
+
+      // Save signup to database
+      await supabase.from("signups" as any).insert({
+        email: email.trim(),
+        device_user_id: prefs.userId,
+        timezone,
+        selected_sessions: selectedSessions,
+        alert_minutes_before: parseInt(alertMinutes),
+      } as any);
+
+      updatePrefs({
+        timezone,
+        selectedSessions,
+        alertMinutesBefore: parseInt(alertMinutes),
+        onboardingComplete: true,
+      });
+      navigate("/dashboard");
+    } catch {
+      toast({ title: "Error saving preferences", variant: "destructive" });
+    } finally {
+      setSaving(false);
+    }
   };
 
   const sessionColorMap: Record<string, string> = {
@@ -184,8 +207,41 @@ const Onboarding = () => {
                 <Button variant="outline" onClick={() => setStep(1)} className="flex-1">
                   Back
                 </Button>
-                <Button onClick={handleComplete} className="flex-1">
-                  Save & Start Alerts
+                <Button onClick={() => setStep(3)} className="flex-1">
+                  Continue
+                </Button>
+              </div>
+            </CardContent>
+          </Card>
+        )}
+
+        {/* Step 4: Email */}
+        {step === 3 && (
+          <Card>
+            <CardHeader>
+              <div className="flex items-center gap-2">
+                <Mail className="h-5 w-5 text-primary" />
+                <CardTitle className="text-lg">Your Email</CardTitle>
+              </div>
+              <CardDescription>Enter your email so we can keep you updated.</CardDescription>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              <Input
+                type="email"
+                placeholder="trader@example.com"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+              />
+              <div className="flex gap-2">
+                <Button variant="outline" onClick={() => setStep(2)} className="flex-1">
+                  Back
+                </Button>
+                <Button
+                  onClick={handleComplete}
+                  disabled={!email.trim() || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email) || saving}
+                  className="flex-1"
+                >
+                  {saving ? "Saving…" : "Save & Start Alerts"}
                 </Button>
               </div>
             </CardContent>
@@ -194,7 +250,7 @@ const Onboarding = () => {
 
         {/* Progress */}
         <div className="flex justify-center gap-2">
-          {[0, 1, 2].map((s) => (
+          {[0, 1, 2, 3].map((s) => (
             <div
               key={s}
               className={`h-2 w-8 rounded-full transition-all ${

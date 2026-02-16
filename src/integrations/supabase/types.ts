@@ -14,7 +14,36 @@ export type Database = {
   }
   public: {
     Tables: {
-      [_ in never]: never
+      signups: {
+        Row: {
+          alert_minutes_before: number | null
+          created_at: string
+          device_user_id: string
+          email: string
+          id: string
+          selected_sessions: string[] | null
+          timezone: string | null
+        }
+        Insert: {
+          alert_minutes_before?: number | null
+          created_at?: string
+          device_user_id: string
+          email: string
+          id?: string
+          selected_sessions?: string[] | null
+          timezone?: string | null
+        }
+        Update: {
+          alert_minutes_before?: number | null
+          created_at?: string
+          device_user_id?: string
+          email?: string
+          id?: string
+          selected_sessions?: string[] | null
+          timezone?: string | null
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never

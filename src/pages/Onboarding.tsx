@@ -33,30 +33,34 @@ const Onboarding = () => {
 
   const handleComplete = async () => {
     setSaving(true);
-    try {
-      await requestNotificationPermission();
 
-      // Save signup to database
-      await supabase.from("signups" as any).insert({
+    // Request notification permission with timeout (non-blocking)
+    try {
+      await Promise.race([
+        requestNotificationPermission(),
+        new Promise((resolve) => setTimeout(resolve, 2000)),
+      ]);
+    } catch {}
+
+    // Save signup to database (non-blocking, fire and forget)
+    Promise.resolve(
+      supabase.from("signups").insert({
         email: email.trim(),
         device_user_id: prefs.userId,
         timezone,
         selected_sessions: selectedSessions,
         alert_minutes_before: parseInt(alertMinutes),
-      } as any);
+      })
+    ).catch(() => {});
 
-      updatePrefs({
-        timezone,
-        selectedSessions,
-        alertMinutesBefore: parseInt(alertMinutes),
-        onboardingComplete: true,
-      });
-      navigate("/dashboard");
-    } catch {
-      toast({ title: "Error saving preferences", variant: "destructive" });
-    } finally {
-      setSaving(false);
-    }
+    updatePrefs({
+      timezone,
+      selectedSessions,
+      alertMinutesBefore: parseInt(alertMinutes),
+      onboardingComplete: true,
+    });
+    setSaving(false);
+    navigate("/dashboard");
   };
 
   const sessionColorMap: Record<string, string> = {

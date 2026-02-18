@@ -1,28 +1,30 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
-import { Checkbox } from "@/components/ui/checkbox";
-import { Label } from "@/components/ui/label";
-import { Input } from "@/components/ui/input";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { usePreferences } from "@/hooks/usePreferences";
+import { getDetectedTimezone, getDefaultNotificationPrefs, type NotificationPrefs } from "@/lib/preferences";
 import { FOREX_SESSIONS } from "@/lib/forex-sessions";
-import { getCommonTimezones, getDetectedTimezone } from "@/lib/preferences";
 import { requestNotificationPermission } from "@/lib/notifications";
 import { supabase } from "@/integrations/supabase/client";
-import { Globe, Bell, Clock, TrendingUp, Mail } from "lucide-react";
-import { useToast } from "@/hooks/use-toast";
+
+import OnboardingProgress from "@/components/onboarding/OnboardingProgress";
+import WelcomeStep from "@/components/onboarding/WelcomeStep";
+import TimezoneStep from "@/components/onboarding/TimezoneStep";
+import SessionSelectStep from "@/components/onboarding/SessionSelectStep";
+import NotificationStep from "@/components/onboarding/NotificationStep";
+import SummaryStep from "@/components/onboarding/SummaryStep";
+
+const TOTAL_STEPS = 5;
 
 const Onboarding = () => {
   const navigate = useNavigate();
   const { prefs, updatePrefs } = usePreferences();
-  const { toast } = useToast();
+
+  const [step, setStep] = useState(0);
   const [timezone, setTimezone] = useState(prefs.timezone || getDetectedTimezone());
   const [selectedSessions, setSelectedSessions] = useState<string[]>(prefs.selectedSessions);
-  const [alertMinutes, setAlertMinutes] = useState(String(prefs.alertMinutesBefore));
-  const [email, setEmail] = useState("");
-  const [step, setStep] = useState(0);
+  const [notificationPrefs, setNotificationPrefs] = useState<NotificationPrefs>(
+    prefs.notificationPrefs || getDefaultNotificationPrefs()
+  );
   const [saving, setSaving] = useState(false);
 
   const toggleSession = (id: string) => {
@@ -31,241 +33,90 @@ const Onboarding = () => {
     );
   };
 
+  const selectAllSessions = () => {
+    const allIds = FOREX_SESSIONS.map((s) => s.id);
+    setSelectedSessions((prev) =>
+      prev.length === allIds.length ? [] : allIds
+    );
+  };
+
   const handleComplete = async () => {
     setSaving(true);
 
-    // Request notification permission with timeout (non-blocking)
-    try {
-      await Promise.race([
-        requestNotificationPermission(),
-        new Promise((resolve) => setTimeout(resolve, 2000)),
-      ]);
-    } catch {}
+    if (!notificationPrefs.disabled) {
+      try {
+        await Promise.race([
+          requestNotificationPermission(),
+          new Promise((resolve) => setTimeout(resolve, 2000)),
+        ]);
+      } catch {}
+    }
 
-    // Save signup to database (non-blocking, fire and forget)
-    Promise.resolve(
-      supabase.from("signups").insert({
-        email: email.trim(),
-        device_user_id: prefs.userId,
-        timezone,
-        selected_sessions: selectedSessions,
-        alert_minutes_before: parseInt(alertMinutes),
-      })
-    ).catch(() => {});
+    // Fire-and-forget signup save
+    supabase.from("signups").insert({
+      device_user_id: prefs.userId,
+      email: "onboarding@placeholder.com",
+      timezone,
+      selected_sessions: selectedSessions,
+      alert_minutes_before: notificationPrefs.beforeSession ? 15 : 0,
+    }).then(() => {});
 
     updatePrefs({
       timezone,
       selectedSessions,
-      alertMinutesBefore: parseInt(alertMinutes),
+      alertMinutesBefore: notificationPrefs.beforeSession ? 15 : 10,
+      notificationPrefs,
       onboardingComplete: true,
     });
+
     setSaving(false);
     navigate("/dashboard");
-  };
-
-  const sessionColorMap: Record<string, string> = {
-    tokyo: "bg-tokyo text-tokyo-foreground",
-    london: "bg-london text-london-foreground",
-    newyork: "bg-newyork text-newyork-foreground",
-    sydney: "bg-sydney text-sydney-foreground",
-  };
-
-  const sessionBorderMap: Record<string, string> = {
-    tokyo: "border-tokyo",
-    london: "border-london",
-    newyork: "border-newyork",
-    sydney: "border-sydney",
   };
 
   return (
     <div className="flex min-h-screen items-center justify-center bg-background p-4">
       <div className="w-full max-w-lg space-y-6">
-        {/* Header */}
-        <div className="text-center space-y-2">
-          <div className="inline-flex items-center gap-2 rounded-full bg-primary/10 px-4 py-1.5 text-sm font-medium text-primary">
-            <TrendingUp className="h-4 w-4" />
-            Forex Session Alerts
-          </div>
-          <h1 className="text-3xl font-bold tracking-tight">Never Miss a Session</h1>
-          <p className="text-muted-foreground">
-            Get notified before major forex sessions open, in your timezone.
-          </p>
-        </div>
+        <OnboardingProgress currentStep={step} totalSteps={TOTAL_STEPS} />
 
-        {/* Step 1: Timezone */}
-        {step === 0 && (
-          <Card>
-            <CardHeader>
-              <div className="flex items-center gap-2">
-                <Globe className="h-5 w-5 text-primary" />
-                <CardTitle className="text-lg">Your Timezone</CardTitle>
-              </div>
-              <CardDescription>
-                We detected <span className="font-medium text-foreground">{getDetectedTimezone()}</span>. Change it if needed.
-              </CardDescription>
-            </CardHeader>
-            <CardContent className="space-y-4">
-              <Select value={timezone} onValueChange={setTimezone}>
-                <SelectTrigger>
-                  <SelectValue />
-                </SelectTrigger>
-                <SelectContent>
-                  {getCommonTimezones().map((tz) => (
-                    <SelectItem key={tz} value={tz}>
-                      {tz.replace(/_/g, " ")}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-              <Button className="w-full" onClick={() => setStep(1)}>
-                Continue
-              </Button>
-            </CardContent>
-          </Card>
-        )}
-
-        {/* Step 2: Session Selection */}
+        {step === 0 && <WelcomeStep onNext={() => setStep(1)} />}
         {step === 1 && (
-          <Card>
-            <CardHeader>
-              <div className="flex items-center gap-2">
-                <Bell className="h-5 w-5 text-primary" />
-                <CardTitle className="text-lg">Choose Sessions</CardTitle>
-              </div>
-              <CardDescription>Select which sessions you want alerts for.</CardDescription>
-            </CardHeader>
-            <CardContent className="space-y-3">
-              {FOREX_SESSIONS.map((session) => (
-                <div
-                  key={session.id}
-                  className={`flex items-center gap-3 rounded-lg border-2 p-3 cursor-pointer transition-all ${
-                    selectedSessions.includes(session.id)
-                      ? sessionBorderMap[session.id] + " bg-accent/50"
-                      : "border-border"
-                  }`}
-                  onClick={() => toggleSession(session.id)}
-                >
-                  <Checkbox
-                    checked={selectedSessions.includes(session.id)}
-                    onCheckedChange={() => toggleSession(session.id)}
-                  />
-                  <div
-                    className={`h-3 w-3 rounded-full ${sessionColorMap[session.id]}`}
-                  />
-                  <div className="flex-1">
-                    <Label className="font-medium cursor-pointer">{session.name}</Label>
-                    <p className="text-xs text-muted-foreground">
-                      {session.pairs.slice(0, 3).join(", ")}
-                    </p>
-                  </div>
-                </div>
-              ))}
-              <div className="flex gap-2 pt-2">
-                <Button variant="outline" onClick={() => setStep(0)} className="flex-1">
-                  Back
-                </Button>
-                <Button
-                  onClick={() => setStep(2)}
-                  disabled={selectedSessions.length === 0}
-                  className="flex-1"
-                >
-                  Continue
-                </Button>
-              </div>
-            </CardContent>
-          </Card>
+          <TimezoneStep
+            timezone={timezone}
+            onTimezoneChange={setTimezone}
+            onNext={() => setStep(2)}
+            onBack={() => setStep(0)}
+          />
         )}
-
-        {/* Step 3: Alert Timing */}
         {step === 2 && (
-          <Card>
-            <CardHeader>
-              <div className="flex items-center gap-2">
-                <Clock className="h-5 w-5 text-primary" />
-                <CardTitle className="text-lg">Alert Timing</CardTitle>
-              </div>
-              <CardDescription>How early do you want to be notified?</CardDescription>
-            </CardHeader>
-            <CardContent className="space-y-3">
-              {[5, 10, 15].map((min) => (
-                <div
-                  key={min}
-                  className={`flex items-center gap-3 rounded-lg border-2 p-3 cursor-pointer transition-all ${
-                    alertMinutes === String(min) ? "border-primary bg-primary/5" : "border-border"
-                  }`}
-                  onClick={() => setAlertMinutes(String(min))}
-                >
-                  <div
-                    className={`h-4 w-4 rounded-full border-2 flex items-center justify-center ${
-                      alertMinutes === String(min) ? "border-primary" : "border-muted-foreground"
-                    }`}
-                  >
-                    {alertMinutes === String(min) && (
-                      <div className="h-2 w-2 rounded-full bg-primary" />
-                    )}
-                  </div>
-                  <Label className="cursor-pointer font-medium">{min} minutes before</Label>
-                </div>
-              ))}
-              <div className="flex gap-2 pt-2">
-                <Button variant="outline" onClick={() => setStep(1)} className="flex-1">
-                  Back
-                </Button>
-                <Button onClick={() => setStep(3)} className="flex-1">
-                  Continue
-                </Button>
-              </div>
-            </CardContent>
-          </Card>
+          <SessionSelectStep
+            selectedSessions={selectedSessions}
+            onToggle={toggleSession}
+            onSelectAll={selectAllSessions}
+            onNext={() => setStep(3)}
+            onBack={() => setStep(1)}
+          />
         )}
-
-        {/* Step 4: Email */}
         {step === 3 && (
-          <Card>
-            <CardHeader>
-              <div className="flex items-center gap-2">
-                <Mail className="h-5 w-5 text-primary" />
-                <CardTitle className="text-lg">Your Email</CardTitle>
-              </div>
-              <CardDescription>Enter your email so we can keep you updated.</CardDescription>
-            </CardHeader>
-            <CardContent className="space-y-4">
-              <Input
-                type="email"
-                placeholder="trader@example.com"
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-              />
-              <div className="flex gap-2">
-                <Button variant="outline" onClick={() => setStep(2)} className="flex-1">
-                  Back
-                </Button>
-                <Button
-                  onClick={handleComplete}
-                  disabled={!email.trim() || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email) || saving}
-                  className="flex-1"
-                >
-                  {saving ? "Saving…" : "Save & Start Alerts"}
-                </Button>
-              </div>
-            </CardContent>
-          </Card>
+          <NotificationStep
+            notificationPrefs={notificationPrefs}
+            onChange={setNotificationPrefs}
+            onNext={() => setStep(4)}
+            onBack={() => setStep(2)}
+          />
         )}
-
-        {/* Progress */}
-        <div className="flex justify-center gap-2">
-          {[0, 1, 2, 3].map((s) => (
-            <div
-              key={s}
-              className={`h-2 w-8 rounded-full transition-all ${
-                s === step ? "bg-primary" : s < step ? "bg-primary/40" : "bg-muted"
-              }`}
-            />
-          ))}
-        </div>
+        {step === 4 && (
+          <SummaryStep
+            timezone={timezone}
+            selectedSessions={selectedSessions}
+            notificationPrefs={notificationPrefs}
+            saving={saving}
+            onComplete={handleComplete}
+            onBack={() => setStep(3)}
+          />
+        )}
 
         <p className="text-center text-xs text-muted-foreground">
-          Session timing alerts only. Not financial advice.
+          Market Clock Pro · Session timing alerts only. Not financial advice.
         </p>
       </div>
     </div>

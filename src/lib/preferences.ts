@@ -1,5 +1,14 @@
 import { v4 } from "../lib/uuid";
 
+export type TraderType = "beginner" | "intraday" | "scalper" | "swing";
+
+export interface NotificationPrefs {
+  beforeSession: boolean;
+  atSessionOpen: boolean;
+  overlapAlerts: boolean;
+  disabled: boolean;
+}
+
 export interface UserPreferences {
   userId: string;
   timezone: string;
@@ -7,6 +16,8 @@ export interface UserPreferences {
   alertMinutesBefore: number;
   isPaused: boolean;
   onboardingComplete: boolean;
+  traderType?: TraderType;
+  notificationPrefs: NotificationPrefs;
 }
 
 const STORAGE_KEY = "forex_alerts_preferences";
@@ -19,6 +30,15 @@ export function getDetectedTimezone(): string {
   return Intl.DateTimeFormat().resolvedOptions().timeZone;
 }
 
+export function getDefaultNotificationPrefs(): NotificationPrefs {
+  return {
+    beforeSession: true,
+    atSessionOpen: true,
+    overlapAlerts: true,
+    disabled: false,
+  };
+}
+
 export function getDefaultPreferences(): UserPreferences {
   return {
     userId: generateUserId(),
@@ -27,6 +47,7 @@ export function getDefaultPreferences(): UserPreferences {
     alertMinutesBefore: 10,
     isPaused: false,
     onboardingComplete: false,
+    notificationPrefs: getDefaultNotificationPrefs(),
   };
 }
 

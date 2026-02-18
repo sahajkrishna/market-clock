@@ -1,20 +1,7 @@
-import { useEffect } from "react";
-import { useNavigate } from "react-router-dom";
-import { loadPreferences } from "@/lib/preferences";
+import LandingPage from "./LandingPage";
 
 const Index = () => {
-  const navigate = useNavigate();
-  const prefs = loadPreferences();
-
-  useEffect(() => {
-    if (prefs.onboardingComplete) {
-      navigate("/dashboard");
-    } else {
-      navigate("/onboarding");
-    }
-  }, []);
-
-  return null;
+  return <LandingPage />;
 };
 
 export default Index;

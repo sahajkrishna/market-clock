@@ -95,8 +95,11 @@ const LandingPage = () => {
             <span className="text-lg font-bold tracking-tight">Market Clock</span>
           </div>
           <div className="flex items-center gap-3">
+            <Link to="/dashboard">
+              <Button variant="ghost" size="sm">Dashboard</Button>
+            </Link>
             <Link to="/onboarding">
-              <Button size="sm">Launch App</Button>
+              <Button size="sm">Get Started</Button>
             </Link>
           </div>
         </div>
@@ -118,7 +121,7 @@ const LandingPage = () => {
             Real-time session countdowns, smart alerts, and session overlap tracking — built for traders who need precise timing.
           </p>
           <div className="mt-10 flex flex-col items-center gap-4 sm:flex-row sm:justify-center">
-            <Link to="/onboarding">
+            <Link to="/dashboard">
               <Button size="lg" className="gap-2 text-base px-8">
                 Launch Market Clock
                 <ArrowRight className="h-4 w-4" />
@@ -217,7 +220,7 @@ const LandingPage = () => {
           <p className="text-muted-foreground text-lg">
             Know exactly when sessions open, close, and overlap — in your timezone.
           </p>
-          <Link to="/onboarding">
+          <Link to="/dashboard">
             <Button size="lg" className="gap-2 text-base px-10 mt-4">
               Launch Market Clock
               <ArrowRight className="h-4 w-4" />

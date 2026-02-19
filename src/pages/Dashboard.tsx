@@ -33,7 +33,7 @@ const Dashboard = () => {
 
   useEffect(() => {
     if (!prefs.onboardingComplete) {
-      navigate("/");
+      navigate("/onboarding");
     }
   }, [prefs.onboardingComplete, navigate]);
 

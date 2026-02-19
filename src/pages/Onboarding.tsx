@@ -1,7 +1,7 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { usePreferences } from "@/hooks/usePreferences";
-import { getDetectedTimezone, getDefaultNotificationPrefs, type NotificationPrefs } from "@/lib/preferences";
+import { getDetectedTimezone, getDefaultNotificationPrefs, type NotificationPrefs, savePreferences } from "@/lib/preferences";
 import { FOREX_SESSIONS } from "@/lib/forex-sessions";
 import { requestNotificationPermission } from "@/lib/notifications";
 import { supabase } from "@/integrations/supabase/client";
@@ -18,6 +18,13 @@ const TOTAL_STEPS = 5;
 const Onboarding = () => {
   const navigate = useNavigate();
   const { prefs, updatePrefs } = usePreferences();
+
+  // If onboarding already done, go to dashboard immediately
+  useEffect(() => {
+    if (prefs.onboardingComplete) {
+      navigate("/dashboard", { replace: true });
+    }
+  }, [prefs.onboardingComplete, navigate]);
 
   const [step, setStep] = useState(0);
   const [timezone, setTimezone] = useState(prefs.timezone || getDetectedTimezone());
@@ -61,6 +68,18 @@ const Onboarding = () => {
       alert_minutes_before: notificationPrefs.beforeSession ? 15 : 0,
     }).then(() => {});
 
+    // Build the final prefs and save DIRECTLY to localStorage before navigating
+    const finalPrefs = {
+      ...prefs,
+      timezone,
+      selectedSessions,
+      alertMinutesBefore: notificationPrefs.beforeSession ? 15 : 10,
+      notificationPrefs,
+      onboardingComplete: true,
+    };
+    savePreferences(finalPrefs);
+    
+    // Also update React state
     updatePrefs({
       timezone,
       selectedSessions,
@@ -69,8 +88,8 @@ const Onboarding = () => {
       onboardingComplete: true,
     });
 
-    setSaving(false);
-    navigate("/dashboard");
+    // Navigate after localStorage is guaranteed written
+    navigate("/dashboard", { replace: true });
   };
 
   return (

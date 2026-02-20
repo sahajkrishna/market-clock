@@ -9,6 +9,7 @@ import { SessionStatusCard } from "@/components/dashboard/SessionStatusCard";
 import { SessionTimeline } from "@/components/dashboard/SessionTimeline";
 import { NextSessionCard } from "@/components/dashboard/NextSessionCard";
 import { EconomicCalendarPanel, CustomSessionPanel, StrategyHintBanner } from "@/components/dashboard/ProFeaturePanels";
+import { GoldPriceCard } from "@/components/dashboard/GoldPriceCard";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import {
@@ -97,6 +98,9 @@ const Dashboard = () => {
       </header>
 
       <main className="container px-4 py-8 max-w-7xl space-y-8">
+        {/* Gold Price */}
+        <GoldPriceCard />
+
         {/* Live Clock */}
         <LiveClock timezone={prefs.timezone} />
 

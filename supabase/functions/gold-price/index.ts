@@ -6,9 +6,19 @@ const corsHeaders = {
     "authorization, x-client-info, apikey, content-type, x-supabase-client-platform, x-supabase-client-platform-version, x-supabase-client-runtime, x-supabase-client-runtime-version",
 };
 
-let cachedPrice: number | null = null;
+interface CachedQuote {
+  price: number;
+  high: number;
+  low: number;
+  open: number;
+  change: number;
+  percent_change: number;
+  timestamp: string;
+}
+
+let cached: CachedQuote | null = null;
 let cacheTimestamp = 0;
-const CACHE_TTL = 60_000; // 60 seconds
+const CACHE_TTL = 60_000; // 60 seconds – stays within free-tier 8 req/min
 
 serve(async (req) => {
   if (req.method === "OPTIONS") {
@@ -23,23 +33,22 @@ serve(async (req) => {
     );
   }
 
-  // Return cached price if still fresh
-  if (cachedPrice !== null && Date.now() - cacheTimestamp < CACHE_TTL) {
-    return new Response(JSON.stringify({ price: cachedPrice }), {
+  // Return cached data if still fresh
+  if (cached !== null && Date.now() - cacheTimestamp < CACHE_TTL) {
+    return new Response(JSON.stringify(cached), {
       headers: { ...corsHeaders, "Content-Type": "application/json" },
     });
   }
 
   try {
     const res = await fetch(
-      `https://api.twelvedata.com/price?symbol=XAU/USD&apikey=${apiKey}`
+      `https://api.twelvedata.com/quote?symbol=XAU/USD&apikey=${apiKey}`
     );
     const data = await res.json();
 
     if (data.code || data.status === "error") {
-      // If rate-limited but we have a cached value, return it
-      if (cachedPrice !== null) {
-        return new Response(JSON.stringify({ price: cachedPrice }), {
+      if (cached !== null) {
+        return new Response(JSON.stringify(cached), {
           headers: { ...corsHeaders, "Content-Type": "application/json" },
         });
       }
@@ -49,16 +58,24 @@ serve(async (req) => {
       );
     }
 
-    cachedPrice = parseFloat(data.price);
+    cached = {
+      price: parseFloat(data.close),
+      high: parseFloat(data.high),
+      low: parseFloat(data.low),
+      open: parseFloat(data.open),
+      change: parseFloat(data.change),
+      percent_change: parseFloat(data.percent_change),
+      timestamp: data.datetime || new Date().toISOString(),
+    };
     cacheTimestamp = Date.now();
 
-    return new Response(JSON.stringify({ price: cachedPrice }), {
+    return new Response(JSON.stringify(cached), {
       headers: { ...corsHeaders, "Content-Type": "application/json" },
     });
   } catch (err) {
     const msg = err instanceof Error ? err.message : "Unknown error";
-    if (cachedPrice !== null) {
-      return new Response(JSON.stringify({ price: cachedPrice }), {
+    if (cached !== null) {
+      return new Response(JSON.stringify(cached), {
         headers: { ...corsHeaders, "Content-Type": "application/json" },
       });
     }

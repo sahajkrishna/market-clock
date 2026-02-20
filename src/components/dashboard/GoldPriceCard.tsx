@@ -3,7 +3,7 @@ import { Card, CardContent } from "@/components/ui/card";
 import { TrendingUp, TrendingDown, Loader2, WifiOff } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 
-const REFRESH_INTERVAL = 12000; // 12 seconds
+const REFRESH_INTERVAL = 60000; // 60 seconds – stays within free-tier 8 req/min
 
 export const GoldPriceCard = () => {
   const [price, setPrice] = useState<number | null>(null);

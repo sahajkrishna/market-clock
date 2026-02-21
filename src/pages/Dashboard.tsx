@@ -10,6 +10,7 @@ import { SessionTimeline } from "@/components/dashboard/SessionTimeline";
 import { NextSessionCard } from "@/components/dashboard/NextSessionCard";
 import { EconomicCalendarPanel, CustomSessionPanel, StrategyHintBanner } from "@/components/dashboard/ProFeaturePanels";
 import { GoldPriceCard } from "@/components/dashboard/GoldPriceCard";
+import { TradingViewWidget } from "@/components/dashboard/TradingViewWidget";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import {
@@ -98,8 +99,11 @@ const Dashboard = () => {
       </header>
 
       <main className="container px-4 py-8 max-w-7xl space-y-8">
-        {/* Gold Price */}
-        <GoldPriceCard />
+        {/* Gold Price Section */}
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+          <GoldPriceCard />
+          <TradingViewWidget />
+        </div>
 
         {/* Live Clock */}
         <LiveClock timezone={prefs.timezone} />

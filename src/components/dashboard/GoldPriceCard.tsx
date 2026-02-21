@@ -3,7 +3,7 @@ import { Card, CardContent } from "@/components/ui/card";
 import { TrendingUp, TrendingDown, Loader2, WifiOff, ArrowUp, ArrowDown } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 
-const REFRESH_INTERVAL = 15000; // 15 seconds – server cache handles rate-limiting
+const REFRESH_INTERVAL = 60000; // 60 seconds – matches server cache TTL to avoid rate limits
 
 interface GoldQuote {
   price: number;

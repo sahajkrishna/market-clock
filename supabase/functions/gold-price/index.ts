@@ -48,13 +48,15 @@ serve(async (req) => {
 
     if (data.code || data.status === "error") {
       if (cached !== null) {
+        // Extend cache to avoid re-hitting a rate-limited API
+        cacheTimestamp = Date.now();
         return new Response(JSON.stringify(cached), {
           headers: { ...corsHeaders, "Content-Type": "application/json" },
         });
       }
       return new Response(
-        JSON.stringify({ error: data.message || "API error" }),
-        { status: 502, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+        JSON.stringify({ error: "Gold price temporarily unavailable. Please try again shortly." }),
+        { status: 503, headers: { ...corsHeaders, "Content-Type": "application/json", "Retry-After": "60" } }
       );
     }
 

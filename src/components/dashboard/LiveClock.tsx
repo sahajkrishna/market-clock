@@ -31,13 +31,13 @@ export function LiveClock({ timezone }: LiveClockProps) {
   const tzLabel = timezone.replace(/_/g, " ").split("/").pop() || timezone;
 
   return (
-    <div className="text-center space-y-1">
-      <p className="text-xs uppercase tracking-widest text-muted-foreground font-medium">
+    <div className="text-center space-y-2">
+      <p className="text-xs uppercase tracking-[0.2em] text-muted-foreground font-medium">
         Your Local Time · {tzLabel}
       </p>
-      <h1 className="text-5xl md:text-7xl font-mono font-bold tracking-tight tabular-nums text-foreground">
+      <h2 className="text-6xl md:text-8xl font-mono font-extrabold tracking-tighter tabular-nums text-foreground drop-shadow-lg">
         {timeStr}
-      </h1>
+      </h2>
       <p className="text-sm text-muted-foreground">{dateStr}</p>
     </div>
   );

@@ -1,6 +1,7 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { useNavigate } from "react-router-dom";
 import { usePreferences } from "@/hooks/usePreferences";
+import { useMarketAlerts } from "@/hooks/useMarketAlerts";
 import { FOREX_SESSIONS } from "@/lib/forex-sessions";
 import { ThemeToggle } from "@/components/ThemeToggle";
 import { LiveClock } from "@/components/dashboard/LiveClock";
@@ -9,6 +10,7 @@ import { MarketCard } from "@/components/dashboard/MarketCard";
 import { SessionTimeline } from "@/components/dashboard/SessionTimeline";
 import { NextSessionCard } from "@/components/dashboard/NextSessionCard";
 import { TradingViewWidget } from "@/components/dashboard/TradingViewWidget";
+import { AlertPanel } from "@/components/dashboard/AlertPanel";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import {
@@ -39,6 +41,36 @@ const Dashboard = () => {
   const { toast } = useToast();
   const [now, setNow] = useState(new Date());
   const [activeNav, setActiveNav] = useState("hero");
+  const [alertPanelOpen, setAlertPanelOpen] = useState(false);
+  const alertPanelRef = useRef<HTMLDivElement>(null);
+
+  const { alerts, unreadCount, markAllRead, clearAlerts } = useMarketAlerts(
+    prefs.selectedSessions,
+    prefs.isPaused
+  );
+
+  // Show toast for new alerts
+  const lastAlertCount = useRef(alerts.length);
+  useEffect(() => {
+    if (alerts.length > lastAlertCount.current) {
+      const newest = alerts[alerts.length - 1];
+      if (newest) {
+        toast({ title: newest.message, duration: 4000 });
+      }
+    }
+    lastAlertCount.current = alerts.length;
+  }, [alerts, toast]);
+
+  // Close alert panel on outside click
+  useEffect(() => {
+    const handler = (e: MouseEvent) => {
+      if (alertPanelRef.current && !alertPanelRef.current.contains(e.target as Node)) {
+        setAlertPanelOpen(false);
+      }
+    };
+    if (alertPanelOpen) document.addEventListener("mousedown", handler);
+    return () => document.removeEventListener("mousedown", handler);
+  }, [alertPanelOpen]);
 
   useEffect(() => {
     if (!prefs.onboardingComplete) {
@@ -110,9 +142,37 @@ const Dashboard = () => {
           </nav>
 
           <div className="flex items-center gap-1">
-            <Button variant="ghost" size="icon" onClick={handleTestNotification} title="Test notification" className="rounded-lg hover:bg-muted/30">
-              {notifPermission === "granted" ? <Bell className="h-4 w-4" /> : <BellOff className="h-4 w-4 text-muted-foreground" />}
-            </Button>
+            {/* Alert Bell with Panel */}
+            <div className="relative" ref={alertPanelRef}>
+              <Button
+                variant="ghost"
+                size="icon"
+                onClick={() => {
+                  setAlertPanelOpen((o) => !o);
+                  if (!alertPanelOpen) markAllRead();
+                }}
+                title="Market alerts"
+                className="rounded-lg hover:bg-muted/30 relative"
+              >
+                {notifPermission === "granted" ? (
+                  <Bell className="h-4 w-4" />
+                ) : (
+                  <BellOff className="h-4 w-4 text-muted-foreground" />
+                )}
+                {unreadCount > 0 && (
+                  <span className="absolute -top-0.5 -right-0.5 h-4 min-w-[16px] rounded-full bg-destructive text-destructive-foreground text-[10px] font-bold flex items-center justify-center px-1">
+                    {unreadCount}
+                  </span>
+                )}
+              </Button>
+
+              {alertPanelOpen && (
+                <div className="absolute right-0 top-full mt-2 z-50 animate-fade-in">
+                  <AlertPanel alerts={alerts} onMarkAllRead={markAllRead} onClear={clearAlerts} />
+                </div>
+              )}
+            </div>
+
             <Button variant="ghost" size="icon" onClick={() => updatePrefs({ isPaused: !prefs.isPaused })} title={prefs.isPaused ? "Resume alerts" : "Pause alerts"} className="rounded-lg hover:bg-muted/30">
               {prefs.isPaused ? <Play className="h-4 w-4" /> : <Pause className="h-4 w-4" />}
             </Button>
@@ -138,12 +198,9 @@ const Dashboard = () => {
         {/* Main Section: Chart (left) + Market Cards (right) */}
         <section id="sessions" className="animate-fade-in" style={{ animationDelay: "0.15s" }}>
           <div className="grid grid-cols-1 lg:grid-cols-[1fr_340px] gap-6">
-            {/* Left: Primary Chart */}
             <div className="min-h-[480px]">
               <TradingViewWidget />
             </div>
-
-            {/* Right: Stacked Market Cards */}
             <div className="flex flex-col gap-4">
               {FOREX_SESSIONS.map((session, i) => (
                 <div key={session.id} className="animate-fade-in" style={{ animationDelay: `${0.05 * i}s` }}>
@@ -154,10 +211,8 @@ const Dashboard = () => {
           </div>
         </section>
 
-        {/* Next Session Countdown */}
         <NextSessionCard timezone={prefs.timezone} />
 
-        {/* 24-Hour Timeline */}
         <section id="alerts" className="space-y-6">
           <SessionTimeline timezone={prefs.timezone} />
         </section>

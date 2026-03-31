@@ -14,7 +14,7 @@ export const TradingViewWidget = ({ symbol = "OANDA:XAUUSD" }: TradingViewWidget
     container.innerHTML = "";
 
     const script = document.createElement("script");
-    script.src = "https://s3.tradingview.com/external-embedding/embed-widget-mini-symbol-overview.js";
+    script.src = "https://s3.tradingview.com/external-embedding/embed-widget-advanced-chart.js";
     script.type = "text/javascript";
     script.async = true;
     script.innerHTML = JSON.stringify({
@@ -22,13 +22,18 @@ export const TradingViewWidget = ({ symbol = "OANDA:XAUUSD" }: TradingViewWidget
       width: "100%",
       height: "100%",
       locale: "en",
-      dateRange: "1D",
-      colorTheme: "dark",
-      isTransparent: true,
-      autosize: true,
-      largeChartUrl: "",
-      noTimeScale: false,
-      chartOnly: false,
+      interval: "15",
+      timezone: "Etc/UTC",
+      theme: "dark",
+      style: "2",
+      withdateranges: true,
+      hide_side_toolbar: true,
+      allow_symbol_change: false,
+      save_image: false,
+      hide_volume: true,
+      support_host: "https://www.tradingview.com",
+      backgroundColor: "rgba(0, 0, 0, 0)",
+      gridColor: "rgba(255, 255, 255, 0.03)",
     });
 
     container.appendChild(script);
@@ -39,20 +44,21 @@ export const TradingViewWidget = ({ symbol = "OANDA:XAUUSD" }: TradingViewWidget
   }, [symbol]);
 
   return (
-    <div className="glass-card rounded-2xl overflow-hidden glow-gold">
+    <div className="glass-card rounded-2xl overflow-hidden glow-gold h-full flex flex-col">
       <div className="px-5 pt-4 pb-2">
-        <div className="flex items-center gap-3 mb-3">
-          <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-neon-gold/10 text-neon-gold text-sm font-bold select-none">
+        <div className="flex items-center gap-3">
+          <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-neon-gold/10 text-neon-gold text-sm font-bold select-none">
             Au
           </div>
-          <p className="text-xs font-medium tracking-wider uppercase text-muted-foreground">
-            Live Chart (XAUUSD)
-          </p>
+          <div>
+            <p className="text-sm font-semibold tracking-tight">XAUUSD · Gold</p>
+            <p className="text-[10px] text-muted-foreground uppercase tracking-wider">Live Chart</p>
+          </div>
         </div>
       </div>
       <div
         ref={containerRef}
-        className="tradingview-widget-container h-[220px] sm:h-[260px]"
+        className="tradingview-widget-container flex-1 min-h-[420px]"
       />
     </div>
   );

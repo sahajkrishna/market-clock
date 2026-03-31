@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { useNavigate, useLocation } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 import { usePreferences } from "@/hooks/usePreferences";
 import { FOREX_SESSIONS } from "@/lib/forex-sessions";
 import { ThemeToggle } from "@/components/ThemeToggle";
@@ -8,8 +8,6 @@ import { ActiveSessionBanner } from "@/components/dashboard/ActiveSessionBanner"
 import { MarketCard } from "@/components/dashboard/MarketCard";
 import { SessionTimeline } from "@/components/dashboard/SessionTimeline";
 import { NextSessionCard } from "@/components/dashboard/NextSessionCard";
-import { StrategyHintBanner } from "@/components/dashboard/ProFeaturePanels";
-import { GoldPriceCard } from "@/components/dashboard/GoldPriceCard";
 import { TradingViewWidget } from "@/components/dashboard/TradingViewWidget";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -20,9 +18,8 @@ import {
   TrendingUp,
   Bell,
   BellOff,
-  BarChart3,
-  Clock,
   Activity,
+  Clock,
 } from "lucide-react";
 import {
   getNotificationPermission,
@@ -95,7 +92,6 @@ const Dashboard = () => {
             )}
           </div>
 
-          {/* Nav links */}
           <nav className="hidden md:flex items-center gap-1">
             {navItems.map((item) => (
               <button
@@ -114,102 +110,52 @@ const Dashboard = () => {
           </nav>
 
           <div className="flex items-center gap-1">
-            <Button
-              variant="ghost"
-              size="icon"
-              onClick={handleTestNotification}
-              title="Test notification"
-              className="rounded-lg hover:bg-muted/30"
-            >
-              {notifPermission === "granted" ? (
-                <Bell className="h-4 w-4" />
-              ) : (
-                <BellOff className="h-4 w-4 text-muted-foreground" />
-              )}
+            <Button variant="ghost" size="icon" onClick={handleTestNotification} title="Test notification" className="rounded-lg hover:bg-muted/30">
+              {notifPermission === "granted" ? <Bell className="h-4 w-4" /> : <BellOff className="h-4 w-4 text-muted-foreground" />}
             </Button>
-            <Button
-              variant="ghost"
-              size="icon"
-              onClick={() => updatePrefs({ isPaused: !prefs.isPaused })}
-              title={prefs.isPaused ? "Resume alerts" : "Pause alerts"}
-              className="rounded-lg hover:bg-muted/30"
-            >
+            <Button variant="ghost" size="icon" onClick={() => updatePrefs({ isPaused: !prefs.isPaused })} title={prefs.isPaused ? "Resume alerts" : "Pause alerts"} className="rounded-lg hover:bg-muted/30">
               {prefs.isPaused ? <Play className="h-4 w-4" /> : <Pause className="h-4 w-4" />}
             </Button>
             <ThemeToggle />
-            <Button
-              variant="ghost"
-              size="icon"
-              onClick={() => navigate("/settings")}
-              className="rounded-lg hover:bg-muted/30"
-            >
+            <Button variant="ghost" size="icon" onClick={() => navigate("/settings")} className="rounded-lg hover:bg-muted/30">
               <Settings className="h-4 w-4" />
             </Button>
           </div>
         </div>
       </header>
 
-      <main className="relative container px-4 py-8 max-w-7xl mx-auto space-y-10">
-        {/* Hero Section */}
-        <section id="hero" className="text-center space-y-6 pt-4">
-          <div className="space-y-3 animate-fade-in">
-            <h1 className="text-4xl md:text-5xl font-extrabold tracking-tight bg-gradient-to-r from-foreground via-foreground to-muted-foreground bg-clip-text">
-              Market Clock
-            </h1>
-            <p className="text-muted-foreground text-base md:text-lg max-w-md mx-auto">
-              Track global markets in real time
-            </p>
-          </div>
-
-          {/* Live Clock */}
-          <div className="animate-fade-in" style={{ animationDelay: '0.1s' }}>
+      <main className="relative container px-4 py-8 max-w-7xl mx-auto space-y-8">
+        {/* Top Section: Clock + Active Session Banner */}
+        <section id="hero" className="space-y-4 pt-2">
+          <div className="animate-fade-in">
             <LiveClock timezone={prefs.timezone} />
           </div>
-        </section>
-
-        {/* Active Session Status */}
-        <div className="animate-fade-in" style={{ animationDelay: '0.15s' }}>
-          <ActiveSessionBanner now={now} />
-        </div>
-
-        {/* Gold Price Section */}
-        <section className="animate-fade-in" style={{ animationDelay: '0.2s' }}>
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
-            <GoldPriceCard />
-            <TradingViewWidget />
+          <div className="animate-fade-in" style={{ animationDelay: "0.1s" }}>
+            <ActiveSessionBanner now={now} />
           </div>
         </section>
 
-        {/* Strategy Hint */}
-        <StrategyHintBanner />
+        {/* Main Section: Chart (left) + Market Cards (right) */}
+        <section id="sessions" className="animate-fade-in" style={{ animationDelay: "0.15s" }}>
+          <div className="grid grid-cols-1 lg:grid-cols-[1fr_340px] gap-6">
+            {/* Left: Primary Chart */}
+            <div className="min-h-[480px]">
+              <TradingViewWidget />
+            </div>
+
+            {/* Right: Stacked Market Cards */}
+            <div className="flex flex-col gap-4">
+              {FOREX_SESSIONS.map((session, i) => (
+                <div key={session.id} className="animate-fade-in" style={{ animationDelay: `${0.05 * i}s` }}>
+                  <MarketCard session={session} timezone={prefs.timezone} />
+                </div>
+              ))}
+            </div>
+          </div>
+        </section>
 
         {/* Next Session Countdown */}
         <NextSessionCard timezone={prefs.timezone} />
-
-        {/* Market Cards Grid */}
-        <section id="sessions" className="space-y-6">
-          <div className="flex items-center gap-3">
-            <div className="h-8 w-8 rounded-lg bg-primary/10 flex items-center justify-center">
-              <BarChart3 className="h-4 w-4 text-primary" />
-            </div>
-            <div>
-              <h2 className="text-lg font-bold tracking-tight">Market Sessions</h2>
-              <p className="text-xs text-muted-foreground">Live session status across global markets</p>
-            </div>
-          </div>
-
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-            {FOREX_SESSIONS.map((session, i) => (
-              <div
-                key={session.id}
-                className="animate-fade-in"
-                style={{ animationDelay: `${0.1 * i}s` }}
-              >
-                <MarketCard session={session} timezone={prefs.timezone} />
-              </div>
-            ))}
-          </div>
-        </section>
 
         {/* 24-Hour Timeline */}
         <section id="alerts" className="space-y-6">

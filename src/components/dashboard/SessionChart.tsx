@@ -1,4 +1,4 @@
-import { useState, useEffect, useMemo, useCallback } from "react";
+import { useState, useEffect, useMemo, useCallback, useRef } from "react";
 import { FOREX_SESSIONS, isSessionActive, getSessionLocalTime } from "@/lib/forex-sessions";
 import { Clock, Activity } from "lucide-react";
 
@@ -37,6 +37,7 @@ export function SessionChart({ timezone }: SessionChartProps) {
   const [now, setNow] = useState(new Date());
   const [hovered, setHovered] = useState<HoveredSession | null>(null);
   const [dimensions, setDimensions] = useState({ width: 800, height: 0 });
+  const chartRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     const interval = setInterval(() => setNow(new Date()), 1000);
@@ -69,7 +70,8 @@ export function SessionChart({ timezone }: SessionChartProps) {
     [timezone, now]
   );
 
-  const handleResize = useCallback((el: HTMLDivElement | null) => {
+  useEffect(() => {
+    const el = chartRef.current;
     if (!el) return;
     const observer = new ResizeObserver((entries) => {
       const entry = entries[0];
@@ -102,7 +104,7 @@ export function SessionChart({ timezone }: SessionChartProps) {
       </div>
 
       {/* Chart */}
-      <div ref={handleResize} className="flex-1 relative min-h-[340px] px-1 pb-2">
+      <div ref={chartRef} className="flex-1 relative min-h-[340px] px-1 pb-2">
         <svg width="100%" height={totalHeight} className="overflow-visible">
           <defs>
             {FOREX_SESSIONS.map((s) => (

@@ -179,6 +179,7 @@ const Dashboard = () => {
             <Button variant="ghost" size="icon" onClick={() => updatePrefs({ isPaused: !prefs.isPaused })} title={prefs.isPaused ? "Resume alerts" : "Pause alerts"} className="rounded-lg hover:bg-muted/30">
               {prefs.isPaused ? <Play className="h-4 w-4" /> : <Pause className="h-4 w-4" />}
             </Button>
+            <CustomizePanel sections={sections} onToggle={toggleSection} onMove={moveSection} onReset={resetLayout} />
             <ThemeToggle />
             <Button variant="ghost" size="icon" onClick={() => navigate("/settings")} className="rounded-lg hover:bg-muted/30">
               <Settings className="h-4 w-4" />

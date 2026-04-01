@@ -6,6 +6,7 @@ import { FOREX_SESSIONS } from "@/lib/forex-sessions";
 import { ThemeToggle } from "@/components/ThemeToggle";
 import { LiveClock } from "@/components/dashboard/LiveClock";
 import { ActiveSessionBanner } from "@/components/dashboard/ActiveSessionBanner";
+import { InsightsEngine } from "@/components/dashboard/InsightsEngine";
 import { MarketCard } from "@/components/dashboard/MarketCard";
 import { SessionTimeline } from "@/components/dashboard/SessionTimeline";
 import { NextSessionCard } from "@/components/dashboard/NextSessionCard";

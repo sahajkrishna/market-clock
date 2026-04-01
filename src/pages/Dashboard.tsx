@@ -40,6 +40,7 @@ const navItems = [
 const Dashboard = () => {
   const navigate = useNavigate();
   const { prefs, updatePrefs } = usePreferences();
+  const { sections, toggleSection, moveSection, resetLayout, isVisible } = useDashboardLayout();
   const { toast } = useToast();
   const [now, setNow] = useState(new Date());
   const [activeNav, setActiveNav] = useState("hero");

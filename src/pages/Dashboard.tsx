@@ -2,6 +2,7 @@ import { useState, useEffect, useRef } from "react";
 import { useNavigate } from "react-router-dom";
 import { usePreferences } from "@/hooks/usePreferences";
 import { useMarketAlerts } from "@/hooks/useMarketAlerts";
+import { useDashboardLayout } from "@/hooks/useDashboardLayout";
 import { FOREX_SESSIONS } from "@/lib/forex-sessions";
 import { ThemeToggle } from "@/components/ThemeToggle";
 import { LiveClock } from "@/components/dashboard/LiveClock";
@@ -11,6 +12,7 @@ import { MarketCard } from "@/components/dashboard/MarketCard";
 import { SessionChart } from "@/components/dashboard/SessionChart";
 import { NextSessionCard } from "@/components/dashboard/NextSessionCard";
 import { AlertPanel } from "@/components/dashboard/AlertPanel";
+import { CustomizePanel } from "@/components/dashboard/CustomizePanel";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import {

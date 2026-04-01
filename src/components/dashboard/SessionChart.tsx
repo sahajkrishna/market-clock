@@ -70,7 +70,8 @@ export function SessionChart({ timezone }: SessionChartProps) {
     [timezone, now]
   );
 
-  const handleResize = useCallback((el: HTMLDivElement | null) => {
+  useEffect(() => {
+    const el = chartRef.current;
     if (!el) return;
     const observer = new ResizeObserver((entries) => {
       const entry = entries[0];

@@ -6,6 +6,7 @@ import { FOREX_SESSIONS } from "@/lib/forex-sessions";
 import { ThemeToggle } from "@/components/ThemeToggle";
 import { LiveClock } from "@/components/dashboard/LiveClock";
 import { ActiveSessionBanner } from "@/components/dashboard/ActiveSessionBanner";
+import { InsightsEngine } from "@/components/dashboard/InsightsEngine";
 import { MarketCard } from "@/components/dashboard/MarketCard";
 import { SessionTimeline } from "@/components/dashboard/SessionTimeline";
 import { NextSessionCard } from "@/components/dashboard/NextSessionCard";
@@ -185,12 +186,15 @@ const Dashboard = () => {
       </header>
 
       <main className="relative container px-4 py-8 max-w-7xl mx-auto space-y-8">
-        {/* Top Section: Clock + Active Session Banner */}
+        {/* Top Section: Clock + Active Session Banner + Insights */}
         <section id="hero" className="space-y-4 pt-2">
           <div className="animate-fade-in">
             <LiveClock timezone={prefs.timezone} />
           </div>
           <div className="animate-fade-in" style={{ animationDelay: "0.1s" }}>
+            <InsightsEngine now={now} />
+          </div>
+          <div className="animate-fade-in" style={{ animationDelay: "0.15s" }}>
             <ActiveSessionBanner now={now} />
           </div>
         </section>

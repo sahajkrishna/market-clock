@@ -8,9 +8,8 @@ import { LiveClock } from "@/components/dashboard/LiveClock";
 import { ActiveSessionBanner } from "@/components/dashboard/ActiveSessionBanner";
 import { InsightsEngine } from "@/components/dashboard/InsightsEngine";
 import { MarketCard } from "@/components/dashboard/MarketCard";
-import { SessionTimeline } from "@/components/dashboard/SessionTimeline";
+import { SessionChart } from "@/components/dashboard/SessionChart";
 import { NextSessionCard } from "@/components/dashboard/NextSessionCard";
-import { TradingViewWidget } from "@/components/dashboard/TradingViewWidget";
 import { AlertPanel } from "@/components/dashboard/AlertPanel";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -199,11 +198,11 @@ const Dashboard = () => {
           </div>
         </section>
 
-        {/* Main Section: Chart (left) + Market Cards (right) */}
+        {/* Main Section: Session Chart (left) + Market Cards (right) */}
         <section id="sessions" className="animate-fade-in" style={{ animationDelay: "0.15s" }}>
           <div className="grid grid-cols-1 lg:grid-cols-[1fr_340px] gap-6">
-            <div className="min-h-[480px]">
-              <TradingViewWidget />
+            <div className="min-h-[380px]">
+              <SessionChart timezone={prefs.timezone} />
             </div>
             <div className="flex flex-col gap-4">
               {FOREX_SESSIONS.map((session, i) => (
@@ -216,10 +215,6 @@ const Dashboard = () => {
         </section>
 
         <NextSessionCard timezone={prefs.timezone} />
-
-        <section id="alerts" className="space-y-6">
-          <SessionTimeline timezone={prefs.timezone} />
-        </section>
 
         <p className="text-center text-xs text-muted-foreground pb-6 pt-4">
           Market Clock — Session timing alerts only. Not financial advice.

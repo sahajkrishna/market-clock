@@ -1,4 +1,4 @@
-import { useState, useEffect, useMemo, useCallback } from "react";
+import { useState, useEffect, useMemo, useCallback, useRef } from "react";
 import { FOREX_SESSIONS, isSessionActive, getSessionLocalTime } from "@/lib/forex-sessions";
 import { Clock, Activity } from "lucide-react";
 

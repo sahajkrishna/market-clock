@@ -104,7 +104,7 @@ export function SessionChart({ timezone }: SessionChartProps) {
       </div>
 
       {/* Chart */}
-      <div ref={handleResize} className="flex-1 relative min-h-[340px] px-1 pb-2">
+      <div ref={chartRef} className="flex-1 relative min-h-[340px] px-1 pb-2">
         <svg width="100%" height={totalHeight} className="overflow-visible">
           <defs>
             {FOREX_SESSIONS.map((s) => (

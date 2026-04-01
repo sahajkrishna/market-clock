@@ -37,6 +37,7 @@ export function SessionChart({ timezone }: SessionChartProps) {
   const [now, setNow] = useState(new Date());
   const [hovered, setHovered] = useState<HoveredSession | null>(null);
   const [dimensions, setDimensions] = useState({ width: 800, height: 0 });
+  const chartRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     const interval = setInterval(() => setNow(new Date()), 1000);

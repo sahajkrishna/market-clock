@@ -189,36 +189,68 @@ const Dashboard = () => {
       </header>
 
       <main className="relative container px-4 py-8 max-w-7xl mx-auto space-y-8">
-        {/* Top Section: Clock + Active Session Banner + Insights */}
+        {/* Clock + Banner are always visible */}
         <section id="hero" className="space-y-4 pt-2">
           <div className="animate-fade-in">
             <LiveClock timezone={prefs.timezone} />
-          </div>
-          <div className="animate-fade-in" style={{ animationDelay: "0.1s" }}>
-            <InsightsEngine now={now} />
           </div>
           <div className="animate-fade-in" style={{ animationDelay: "0.15s" }}>
             <ActiveSessionBanner now={now} />
           </div>
         </section>
 
-        {/* Main Section: Session Chart (left) + Market Cards (right) */}
-        <section id="sessions" className="animate-fade-in" style={{ animationDelay: "0.15s" }}>
-          <div className="grid grid-cols-1 lg:grid-cols-[1fr_340px] gap-6">
-            <div className="min-h-[380px]">
-              <SessionChart timezone={prefs.timezone} />
-            </div>
-            <div className="flex flex-col gap-4">
-              {FOREX_SESSIONS.map((session, i) => (
-                <div key={session.id} className="animate-fade-in" style={{ animationDelay: `${0.05 * i}s` }}>
-                  <MarketCard session={session} timezone={prefs.timezone} />
-                </div>
-              ))}
-            </div>
-          </div>
-        </section>
-
-        <NextSessionCard timezone={prefs.timezone} />
+        {/* Orderable sections */}
+        {sections.filter((s) => s.enabled).map((section) => {
+          switch (section.id) {
+            case "insights":
+              return (
+                <section key={section.id} className="animate-fade-in">
+                  <InsightsEngine now={now} />
+                </section>
+              );
+            case "chart":
+              return (
+                <section key={section.id} id="sessions" className="animate-fade-in">
+                  <div className={`grid grid-cols-1 ${isVisible("marketCards") ? "lg:grid-cols-[1fr_340px]" : ""} gap-6`}>
+                    <div className="min-h-[380px]">
+                      <SessionChart timezone={prefs.timezone} />
+                    </div>
+                    {isVisible("marketCards") && (
+                      <div className="flex flex-col gap-4">
+                        {FOREX_SESSIONS.map((session, i) => (
+                          <div key={session.id} className="animate-fade-in" style={{ animationDelay: `${0.05 * i}s` }}>
+                            <MarketCard session={session} timezone={prefs.timezone} />
+                          </div>
+                        ))}
+                      </div>
+                    )}
+                  </div>
+                </section>
+              );
+            case "marketCards":
+              // Rendered inside chart section when both visible; standalone when chart is hidden
+              if (isVisible("chart")) return null;
+              return (
+                <section key={section.id} className="animate-fade-in">
+                  <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+                    {FOREX_SESSIONS.map((session, i) => (
+                      <div key={session.id} className="animate-fade-in" style={{ animationDelay: `${0.05 * i}s` }}>
+                        <MarketCard session={session} timezone={prefs.timezone} />
+                      </div>
+                    ))}
+                  </div>
+                </section>
+              );
+            case "nextSession":
+              return (
+                <section key={section.id} className="animate-fade-in">
+                  <NextSessionCard timezone={prefs.timezone} />
+                </section>
+              );
+            default:
+              return null;
+          }
+        })}
 
         <p className="text-center text-xs text-muted-foreground pb-6 pt-4">
           Market Clock — Session timing alerts only. Not financial advice.

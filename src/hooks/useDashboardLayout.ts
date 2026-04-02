@@ -16,6 +16,7 @@ const DEFAULT_SECTIONS: DashboardSection[] = [
   { id: "chart", label: "Session Chart", enabled: true },
   { id: "marketCards", label: "Market Cards", enabled: true },
   { id: "nextSession", label: "Next Session", enabled: true },
+  { id: "economicCalendar", label: "Economic Calendar", enabled: true },
 ];
 
 function load(): DashboardSection[] {

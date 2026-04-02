@@ -257,6 +257,12 @@ const Dashboard = () => {
                   <NextSessionCard timezone={prefs.timezone} />
                 </section>
               );
+            case "economicCalendar":
+              return (
+                <section key={section.id} className="animate-fade-in">
+                  <EconomicCalendar />
+                </section>
+              );
             default:
               return null;
           }

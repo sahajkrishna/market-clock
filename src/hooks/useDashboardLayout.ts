@@ -12,6 +12,7 @@ const STORAGE_KEY = "dashboard_layout";
 
 const DEFAULT_SECTIONS: DashboardSection[] = [
   { id: "insights", label: "Insights Panel", enabled: true },
+  { id: "tradingView", label: "XAUUSD Live Chart", enabled: true },
   { id: "chart", label: "Session Chart", enabled: true },
   { id: "marketCards", label: "Market Cards", enabled: true },
   { id: "nextSession", label: "Next Session", enabled: true },

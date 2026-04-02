@@ -209,6 +209,14 @@ const Dashboard = () => {
                   <InsightsEngine now={now} />
                 </section>
               );
+            case "tradingView":
+              return (
+                <section key={section.id} className="animate-fade-in">
+                  <div className="min-h-[480px]">
+                    <TradingViewWidget />
+                  </div>
+                </section>
+              );
             case "chart":
               return (
                 <section key={section.id} id="sessions" className="animate-fade-in">

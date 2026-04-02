@@ -58,7 +58,8 @@ export const TradingViewWidget = ({ symbol = "OANDA:XAUUSD" }: TradingViewWidget
       </div>
       <div
         ref={containerRef}
-        className="tradingview-widget-container flex-1 min-h-[420px]"
+        className="tradingview-widget-container flex-1 min-h-[520px]"
+        style={{ height: "100%" }}
       />
     </div>
   );

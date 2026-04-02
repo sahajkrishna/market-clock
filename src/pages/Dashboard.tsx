@@ -212,7 +212,7 @@ const Dashboard = () => {
             case "tradingView":
               return (
                 <section key={section.id} className="animate-fade-in">
-                  <div className="min-h-[480px]">
+                  <div style={{ height: "600px" }}>
                     <TradingViewWidget />
                   </div>
                 </section>

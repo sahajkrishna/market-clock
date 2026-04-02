@@ -1,6 +1,6 @@
 import { useState, useCallback } from "react";
 
-export type SectionId = "insights" | "tradingView" | "chart" | "marketCards" | "nextSession";
+export type SectionId = "insights" | "tradingView" | "chart" | "marketCards" | "nextSession" | "economicCalendar";
 
 export interface DashboardSection {
   id: SectionId;

@@ -1,6 +1,6 @@
 import { useState, useCallback } from "react";
 
-export type SectionId = "insights" | "tradingView" | "chart" | "marketCards" | "nextSession";
+export type SectionId = "insights" | "tradingView" | "chart" | "marketCards" | "nextSession" | "economicCalendar";
 
 export interface DashboardSection {
   id: SectionId;
@@ -16,6 +16,7 @@ const DEFAULT_SECTIONS: DashboardSection[] = [
   { id: "chart", label: "Session Chart", enabled: true },
   { id: "marketCards", label: "Market Cards", enabled: true },
   { id: "nextSession", label: "Next Session", enabled: true },
+  { id: "economicCalendar", label: "Economic Calendar", enabled: true },
 ];
 
 function load(): DashboardSection[] {

@@ -11,6 +11,7 @@ import { InsightsEngine } from "@/components/dashboard/InsightsEngine";
 import { MarketCard } from "@/components/dashboard/MarketCard";
 import { SessionChart } from "@/components/dashboard/SessionChart";
 import { NextSessionCard } from "@/components/dashboard/NextSessionCard";
+import { TradingViewWidget } from "@/components/dashboard/TradingViewWidget";
 import { AlertPanel } from "@/components/dashboard/AlertPanel";
 import { CustomizePanel } from "@/components/dashboard/CustomizePanel";
 import { Button } from "@/components/ui/button";
@@ -206,6 +207,14 @@ const Dashboard = () => {
               return (
                 <section key={section.id} className="animate-fade-in">
                   <InsightsEngine now={now} />
+                </section>
+              );
+            case "tradingView":
+              return (
+                <section key={section.id} className="animate-fade-in">
+                  <div className="min-h-[480px]">
+                    <TradingViewWidget />
+                  </div>
                 </section>
               );
             case "chart":

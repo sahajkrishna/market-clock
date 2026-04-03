@@ -106,6 +106,10 @@ const Dashboard = () => {
             <div className="flex items-center justify-between h-14 px-4">
               <div className="flex items-center gap-3">
                 <SidebarTrigger className="shrink-0" />
+                <MarketModeSwitch
+                  mode={prefs.marketMode ?? "swing"}
+                  onChange={(m: MarketMode) => updatePrefs({ marketMode: m })}
+                />
                 {prefs.isPaused && (
                   <Badge variant="secondary" className="text-xs glass-card">
                     <Pause className="h-3 w-3 mr-1" /> Paused

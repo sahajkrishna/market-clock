@@ -223,6 +223,12 @@ const Dashboard = () => {
                       <EconomicCalendar />
                     </section>
                   );
+                case "marketInterpreter":
+                  return (
+                    <section key={section.id} className="animate-fade-in">
+                      <MarketInterpreter now={now} />
+                    </section>
+                  );
                 default:
                   return null;
               }

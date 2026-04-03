@@ -49,6 +49,7 @@ export function getDefaultPreferences(): UserPreferences {
     alertMinutesBefore: 10,
     isPaused: false,
     onboardingComplete: false,
+    marketMode: "swing",
     notificationPrefs: getDefaultNotificationPrefs(),
   };
 }

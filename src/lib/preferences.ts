@@ -1,6 +1,7 @@
 import { v4 } from "../lib/uuid";
 
 export type TraderType = "beginner" | "intraday" | "scalper" | "swing";
+export type MarketMode = "scalper" | "swing" | "news";
 
 export interface NotificationPrefs {
   beforeSession: boolean;

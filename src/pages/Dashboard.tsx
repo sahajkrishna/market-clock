@@ -12,6 +12,7 @@ import { SessionChart } from "@/components/dashboard/SessionChart";
 import { NextSessionCard } from "@/components/dashboard/NextSessionCard";
 import { TradingViewWidget } from "@/components/dashboard/TradingViewWidget";
 import { EconomicCalendar } from "@/components/dashboard/EconomicCalendar";
+import { MarketInterpreter } from "@/components/dashboard/MarketInterpreter";
 import { AlertPanel } from "@/components/dashboard/AlertPanel";
 import { CustomizePanel } from "@/components/dashboard/CustomizePanel";
 import { AppSidebar } from "@/components/dashboard/AppSidebar";

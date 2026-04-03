@@ -168,8 +168,17 @@ const Dashboard = () => {
               </div>
             </section>
 
-            {/* Orderable sections */}
-            {sections.filter((s) => s.enabled).map((section) => {
+            {/* Orderable sections — filtered by market mode */}
+            {sections.filter((s) => {
+              if (!s.enabled) return false;
+              const mode = prefs.marketMode ?? "swing";
+              // Scalper: current session focus — hide calendar, show chart/cards/insights/interpreter
+              if (mode === "scalper" && (s.id === "economicCalendar")) return false;
+              // News: economic focus — hide chart/tradingView, keep calendar/interpreter/insights
+              if (mode === "news" && (s.id === "tradingView" || s.id === "chart")) return false;
+              // Swing: show everything (default)
+              return true;
+            }).map((section) => {
               switch (section.id) {
                 case "insights":
                   return (

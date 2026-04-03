@@ -16,6 +16,8 @@ import { MarketInterpreter } from "@/components/dashboard/MarketInterpreter";
 import { AlertPanel } from "@/components/dashboard/AlertPanel";
 import { CustomizePanel } from "@/components/dashboard/CustomizePanel";
 import { AppSidebar } from "@/components/dashboard/AppSidebar";
+import { MarketModeSwitch } from "@/components/dashboard/MarketModeSwitch";
+import type { MarketMode } from "@/lib/preferences";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { SidebarProvider, SidebarTrigger } from "@/components/ui/sidebar";

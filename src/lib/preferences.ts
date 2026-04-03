@@ -18,6 +18,7 @@ export interface UserPreferences {
   isPaused: boolean;
   onboardingComplete: boolean;
   traderType?: TraderType;
+  marketMode: MarketMode;
   notificationPrefs: NotificationPrefs;
 }
 

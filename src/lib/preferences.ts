@@ -1,6 +1,7 @@
 import { v4 } from "../lib/uuid";
 
 export type TraderType = "beginner" | "intraday" | "scalper" | "swing";
+export type MarketMode = "scalper" | "swing" | "news";
 
 export interface NotificationPrefs {
   beforeSession: boolean;
@@ -17,6 +18,7 @@ export interface UserPreferences {
   isPaused: boolean;
   onboardingComplete: boolean;
   traderType?: TraderType;
+  marketMode: MarketMode;
   notificationPrefs: NotificationPrefs;
 }
 
@@ -47,6 +49,7 @@ export function getDefaultPreferences(): UserPreferences {
     alertMinutesBefore: 10,
     isPaused: false,
     onboardingComplete: false,
+    marketMode: "swing",
     notificationPrefs: getDefaultNotificationPrefs(),
   };
 }

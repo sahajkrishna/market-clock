@@ -16,6 +16,8 @@ import { MarketInterpreter } from "@/components/dashboard/MarketInterpreter";
 import { AlertPanel } from "@/components/dashboard/AlertPanel";
 import { CustomizePanel } from "@/components/dashboard/CustomizePanel";
 import { AppSidebar } from "@/components/dashboard/AppSidebar";
+import { MarketModeSwitch } from "@/components/dashboard/MarketModeSwitch";
+import type { MarketMode } from "@/lib/preferences";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { SidebarProvider, SidebarTrigger } from "@/components/ui/sidebar";
@@ -104,6 +106,10 @@ const Dashboard = () => {
             <div className="flex items-center justify-between h-14 px-4">
               <div className="flex items-center gap-3">
                 <SidebarTrigger className="shrink-0" />
+                <MarketModeSwitch
+                  mode={prefs.marketMode ?? "swing"}
+                  onChange={(m: MarketMode) => updatePrefs({ marketMode: m })}
+                />
                 {prefs.isPaused && (
                   <Badge variant="secondary" className="text-xs glass-card">
                     <Pause className="h-3 w-3 mr-1" /> Paused
@@ -162,8 +168,17 @@ const Dashboard = () => {
               </div>
             </section>
 
-            {/* Orderable sections */}
-            {sections.filter((s) => s.enabled).map((section) => {
+            {/* Orderable sections — filtered by market mode */}
+            {sections.filter((s) => {
+              if (!s.enabled) return false;
+              const mode = prefs.marketMode ?? "swing";
+              // Scalper: current session focus — hide calendar, show chart/cards/insights/interpreter
+              if (mode === "scalper" && (s.id === "economicCalendar")) return false;
+              // News: economic focus — hide chart/tradingView, keep calendar/interpreter/insights
+              if (mode === "news" && (s.id === "tradingView" || s.id === "chart")) return false;
+              // Swing: show everything (default)
+              return true;
+            }).map((section) => {
               switch (section.id) {
                 case "insights":
                   return (

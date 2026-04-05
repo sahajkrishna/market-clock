@@ -1,89 +1,53 @@
-import { useState, useEffect, useMemo, useCallback, useRef } from "react";
+import { useState, useEffect, useMemo, useRef } from "react";
 import { FOREX_SESSIONS, isSessionActive, getSessionLocalTime } from "@/lib/forex-sessions";
 import { Clock, Activity } from "lucide-react";
 
-const SESSION_COLORS: Record<string, { main: string; glow: string; bg: string }> = {
-  tokyo: { main: "hsl(var(--tokyo))", glow: "hsl(var(--tokyo) / 0.4)", bg: "hsl(var(--tokyo) / 0.08)" },
-  london: { main: "hsl(var(--london))", glow: "hsl(var(--london) / 0.4)", bg: "hsl(var(--london) / 0.08)" },
-  newyork: { main: "hsl(var(--newyork))", glow: "hsl(var(--newyork) / 0.4)", bg: "hsl(var(--newyork) / 0.08)" },
-  sydney: { main: "hsl(var(--sydney))", glow: "hsl(var(--sydney) / 0.4)", bg: "hsl(var(--sydney) / 0.08)" },
+const SESSION_COLORS: Record<string, { main: string; light: string }> = {
+  tokyo: { main: "#3B82F6", light: "rgba(59,130,246,0.18)" },
+  london: { main: "#22C55E", light: "rgba(34,197,94,0.18)" },
+  newyork: { main: "#EF4444", light: "rgba(239,68,68,0.18)" },
+  sydney: { main: "#A855F7", light: "rgba(168,85,247,0.18)" },
 };
 
-const CHART_PADDING = { top: 40, right: 24, bottom: 48, left: 24 };
-const ROW_HEIGHT = 52;
-const ROW_GAP = 8;
+const PADDING = { top: 20, right: 16, bottom: 36, left: 16 };
+const BAR_HEIGHT = 32;
+const BAR_GAP = 10;
 const TOTAL_MINUTES = 24 * 60;
 
-function minutesToX(minutes: number, chartWidth: number): number {
-  return CHART_PADDING.left + (minutes / TOTAL_MINUTES) * chartWidth;
-}
-
-interface HoveredSession {
-  id: string;
-  name: string;
-  x: number;
-  y: number;
-  open: string;
-  close: string;
-  active: boolean;
-  pairs: string[];
-}
-
-interface SessionChartProps {
-  timezone: string;
-}
-
-export function SessionChart({ timezone }: SessionChartProps) {
+export function SessionChart({ timezone }: { timezone: string }) {
   const [now, setNow] = useState(new Date());
-  const [hovered, setHovered] = useState<HoveredSession | null>(null);
-  const [dimensions, setDimensions] = useState({ width: 800, height: 0 });
-  const chartRef = useRef<HTMLDivElement>(null);
+  const containerRef = useRef<HTMLDivElement>(null);
+  const [width, setWidth] = useState(700);
 
   useEffect(() => {
     const interval = setInterval(() => setNow(new Date()), 1000);
     return () => clearInterval(interval);
   }, []);
 
-  const totalHeight = CHART_PADDING.top + FOREX_SESSIONS.length * (ROW_HEIGHT + ROW_GAP) - ROW_GAP + CHART_PADDING.bottom;
-  const chartWidth = dimensions.width - CHART_PADDING.left - CHART_PADDING.right;
-
-  const currentMinutes = now.getUTCHours() * 60 + now.getUTCMinutes();
-  const nowX = minutesToX(currentMinutes, chartWidth);
-
-  const hours = useMemo(() => Array.from({ length: 25 }, (_, i) => i), []);
-
-  const handleMouseMove = useCallback(
-    (sessionIdx: number, session: typeof FOREX_SESSIONS[0], e: React.MouseEvent<SVGRectElement>) => {
-      const rect = e.currentTarget.closest("svg")?.getBoundingClientRect();
-      if (!rect) return;
-      setHovered({
-        id: session.id,
-        name: session.name,
-        x: e.clientX - rect.left,
-        y: CHART_PADDING.top + sessionIdx * (ROW_HEIGHT + ROW_GAP) - 8,
-        open: getSessionLocalTime(session, timezone, "open"),
-        close: getSessionLocalTime(session, timezone, "close"),
-        active: isSessionActive(session, now),
-        pairs: session.pairs,
-      });
-    },
-    [timezone, now]
-  );
-
   useEffect(() => {
-    const el = chartRef.current;
+    const el = containerRef.current;
     if (!el) return;
-    const observer = new ResizeObserver((entries) => {
-      const entry = entries[0];
-      if (entry) setDimensions({ width: entry.contentRect.width, height: entry.contentRect.height });
+    const obs = new ResizeObserver((entries) => {
+      const w = entries[0]?.contentRect.width;
+      if (w && w > 0) setWidth(w);
     });
-    observer.observe(el);
-    setDimensions({ width: el.clientWidth, height: el.clientHeight });
-    return () => observer.disconnect();
+    obs.observe(el);
+    setWidth(el.clientWidth || 700);
+    return () => obs.disconnect();
   }, []);
 
+  const chartW = width - PADDING.left - PADDING.right;
+  const svgH = PADDING.top + FOREX_SESSIONS.length * (BAR_HEIGHT + BAR_GAP) - BAR_GAP + PADDING.bottom;
+
+  const toX = (min: number) => PADDING.left + (min / TOTAL_MINUTES) * chartW;
+
+  const nowMin = now.getUTCHours() * 60 + now.getUTCMinutes();
+  const nowX = toX(nowMin);
+
+  const hours = useMemo(() => [0, 3, 6, 9, 12, 15, 18, 21, 24], []);
+
   return (
-    <div className="glass-card rounded-2xl overflow-hidden h-full flex flex-col">
+    <div className="glass-card rounded-2xl overflow-visible h-full flex flex-col">
       {/* Header */}
       <div className="px-5 pt-4 pb-3 flex items-center justify-between">
         <div className="flex items-center gap-3">
@@ -104,180 +68,137 @@ export function SessionChart({ timezone }: SessionChartProps) {
       </div>
 
       {/* Chart */}
-      <div ref={chartRef} className="flex-1 relative min-h-[340px] px-1 pb-2">
-        <svg width="100%" height={totalHeight} className="overflow-visible">
-          <defs>
-            {FOREX_SESSIONS.map((s) => (
-              <linearGradient key={s.id} id={`grad-${s.id}`} x1="0%" y1="0%" x2="100%" y2="0%">
-                <stop offset="0%" stopColor={SESSION_COLORS[s.id].main} stopOpacity={isSessionActive(s, now) ? 0.8 : 0.25} />
-                <stop offset="50%" stopColor={SESSION_COLORS[s.id].main} stopOpacity={isSessionActive(s, now) ? 0.9 : 0.3} />
-                <stop offset="100%" stopColor={SESSION_COLORS[s.id].main} stopOpacity={isSessionActive(s, now) ? 0.8 : 0.25} />
-              </linearGradient>
-            ))}
-            <filter id="glow">
-              <feGaussianBlur stdDeviation="3" result="blur" />
-              <feMerge>
-                <feMergeNode in="blur" />
-                <feMergeNode in="SourceGraphic" />
-              </feMerge>
-            </filter>
-          </defs>
+      <div ref={containerRef} className="flex-1 relative px-2 pb-2" style={{ minHeight: `${svgH + 8}px` }}>
+        {chartW > 10 && (
+          <svg width={width} height={svgH} style={{ display: "block", overflow: "visible" }}>
+            {/* Grid lines */}
+            {hours.map((h) => {
+              const x = toX(h * 60);
+              return (
+                <line
+                  key={h}
+                  x1={x} y1={PADDING.top - 4}
+                  x2={x} y2={svgH - PADDING.bottom + 8}
+                  stroke="currentColor"
+                  strokeOpacity={0.08}
+                  strokeDasharray={h % 6 === 0 ? "none" : "2 4"}
+                />
+              );
+            })}
 
-          {/* Subtle vertical grid lines */}
-          {hours.filter((h) => h < 24).map((h) => {
-            const x = minutesToX(h * 60, chartWidth);
-            return (
-              <line
-                key={h}
-                x1={x} y1={CHART_PADDING.top - 8}
-                x2={x} y2={totalHeight - CHART_PADDING.bottom + 12}
-                stroke="hsl(var(--border))"
-                strokeOpacity={h % 6 === 0 ? 0.15 : 0.06}
-                strokeDasharray={h % 6 === 0 ? "none" : "2 4"}
-              />
-            );
-          })}
-
-          {/* Hour labels */}
-          {hours.filter((h) => h % 3 === 0 && h < 24).map((h) => {
-            const x = minutesToX(h * 60, chartWidth);
-            return (
+            {/* Hour labels */}
+            {hours.filter((h) => h <= 24).map((h) => (
               <text
                 key={h}
-                x={x} y={totalHeight - CHART_PADDING.bottom + 30}
+                x={toX(h * 60)}
+                y={svgH - 6}
                 textAnchor="middle"
-                className="fill-muted-foreground text-[10px] font-mono"
+                fill="currentColor"
+                opacity={0.4}
+                fontSize={10}
+                fontFamily="monospace"
               >
-                {h.toString().padStart(2, "0")}:00
+                {(h % 24).toString().padStart(2, "0")}:00
               </text>
-            );
-          })}
+            ))}
 
-          {/* Session rows */}
-          {FOREX_SESSIONS.map((session, idx) => {
-            const y = CHART_PADDING.top + idx * (ROW_HEIGHT + ROW_GAP);
-            const openMin = session.openUTC.hour * 60 + session.openUTC.minute;
-            const closeMin = session.closeUTC.hour * 60 + session.closeUTC.minute;
-            const active = isSessionActive(session, now);
-            const crossesMidnight = openMin >= closeMin;
+            {/* Session bars */}
+            {FOREX_SESSIONS.map((session, idx) => {
+              const y = PADDING.top + idx * (BAR_HEIGHT + BAR_GAP);
+              const openMin = session.openUTC.hour * 60 + session.openUTC.minute;
+              const closeMin = session.closeUTC.hour * 60 + session.closeUTC.minute;
+              const active = isSessionActive(session, now);
+              const color = SESSION_COLORS[session.id] || SESSION_COLORS.tokyo;
 
-            const bars: { x1: number; x2: number }[] = [];
-            if (crossesMidnight) {
-              bars.push({ x1: minutesToX(openMin, chartWidth), x2: minutesToX(TOTAL_MINUTES, chartWidth) });
-              bars.push({ x1: minutesToX(0, chartWidth), x2: minutesToX(closeMin, chartWidth) });
-            } else {
-              bars.push({ x1: minutesToX(openMin, chartWidth), x2: minutesToX(closeMin, chartWidth) });
-            }
+              const segments: { x: number; w: number }[] = [];
+              if (openMin >= closeMin) {
+                // Crosses midnight
+                segments.push({ x: toX(openMin), w: toX(TOTAL_MINUTES) - toX(openMin) });
+                segments.push({ x: toX(0), w: toX(closeMin) - toX(0) });
+              } else {
+                segments.push({ x: toX(openMin), w: toX(closeMin) - toX(openMin) });
+              }
 
-            return (
-              <g key={session.id}>
-                {/* Row background on hover */}
-                <rect
-                  x={CHART_PADDING.left} y={y - 2}
-                  width={chartWidth} height={ROW_HEIGHT + 4}
-                  rx={12}
-                  fill={hovered?.id === session.id ? SESSION_COLORS[session.id].bg : "transparent"}
-                  className="transition-all duration-300"
-                />
+              const localOpen = getSessionLocalTime(session, timezone, "open");
+              const localClose = getSessionLocalTime(session, timezone, "close");
 
-                {/* Session label */}
-                <text
-                  x={CHART_PADDING.left + 8} y={y + 14}
-                  className="fill-foreground text-[11px] font-semibold"
-                >
-                  {session.name}
-                </text>
-                <text
-                  x={CHART_PADDING.left + 8} y={y + 28}
-                  className="fill-muted-foreground text-[9px]"
-                >
-                  {active ? "OPEN" : "CLOSED"}
-                </text>
-
-                {/* Session bars */}
-                {bars.map((bar, i) => (
-                  <g key={i}>
-                    {active && (
+              return (
+                <g key={session.id}>
+                  {segments.map((seg, i) => (
+                    <g key={i}>
+                      {/* Glow for active */}
+                      {active && (
+                        <rect
+                          x={seg.x} y={y}
+                          width={Math.max(seg.w, 2)} height={BAR_HEIGHT}
+                          rx={6}
+                          fill={color.main}
+                          opacity={0.15}
+                          filter="url(#session-glow)"
+                        />
+                      )}
+                      {/* Main bar */}
                       <rect
-                        x={bar.x1} y={y + 36}
-                        width={Math.max(0, bar.x2 - bar.x1)} height={10}
-                        rx={5}
-                        fill={SESSION_COLORS[session.id].glow}
-                        filter="url(#glow)"
-                        className="animate-pulse"
+                        x={seg.x} y={y}
+                        width={Math.max(seg.w, 2)} height={BAR_HEIGHT}
+                        rx={6}
+                        fill={color.main}
+                        opacity={active ? 0.7 : 0.3}
                       />
-                    )}
-                    <rect
-                      x={bar.x1} y={y + 36}
-                      width={Math.max(0, bar.x2 - bar.x1)} height={10}
-                      rx={5}
-                      fill={`url(#grad-${session.id})`}
-                      className="transition-all duration-500"
-                    />
-                  </g>
-                ))}
+                      {/* Label inside first segment */}
+                      {i === 0 && seg.w > 50 && (
+                        <>
+                          <text
+                            x={seg.x + 10} y={y + 14}
+                            fill="white"
+                            fontSize={11}
+                            fontWeight={600}
+                          >
+                            {session.name}
+                          </text>
+                          <text
+                            x={seg.x + 10} y={y + 26}
+                            fill="white"
+                            fontSize={9}
+                            opacity={0.7}
+                          >
+                            {active ? `● OPEN` : `${localOpen} – ${localClose}`}
+                          </text>
+                        </>
+                      )}
+                    </g>
+                  ))}
+                </g>
+              );
+            })}
 
-                {/* Invisible hover target */}
-                <rect
-                  x={CHART_PADDING.left} y={y}
-                  width={chartWidth} height={ROW_HEIGHT}
-                  fill="transparent"
-                  className="cursor-pointer"
-                  onMouseMove={(e) => handleMouseMove(idx, session, e)}
-                  onMouseLeave={() => setHovered(null)}
-                />
-              </g>
-            );
-          })}
+            {/* NOW indicator */}
+            <line
+              x1={nowX} y1={PADDING.top - 8}
+              x2={nowX} y2={svgH - PADDING.bottom + 8}
+              stroke="#10B981"
+              strokeWidth={2}
+              strokeDasharray="4 3"
+            />
+            <circle cx={nowX} cy={PADDING.top - 8} r={4} fill="#10B981" />
+            <text
+              x={nowX} y={PADDING.top - 16}
+              textAnchor="middle"
+              fill="#10B981"
+              fontSize={9}
+              fontWeight={700}
+              fontFamily="monospace"
+            >
+              NOW
+            </text>
 
-          {/* Current time indicator */}
-          <line
-            x1={nowX} y1={CHART_PADDING.top - 12}
-            x2={nowX} y2={totalHeight - CHART_PADDING.bottom + 12}
-            stroke="hsl(var(--primary))"
-            strokeWidth={2}
-            strokeDasharray="4 3"
-            className="drop-shadow-[0_0_6px_hsl(var(--primary)/0.6)]"
-          />
-          <circle
-            cx={nowX} cy={CHART_PADDING.top - 12}
-            r={5}
-            fill="hsl(var(--primary))"
-            className="drop-shadow-[0_0_8px_hsl(var(--primary)/0.8)] animate-pulse"
-          />
-          <text
-            x={nowX} y={CHART_PADDING.top - 20}
-            textAnchor="middle"
-            className="fill-primary text-[9px] font-bold font-mono"
-          >
-            NOW
-          </text>
-        </svg>
-
-        {/* Tooltip */}
-        {hovered && (
-          <div
-            className="absolute z-50 pointer-events-none glass-card rounded-xl px-4 py-3 border shadow-xl transition-all duration-150"
-            style={{
-              left: Math.min(hovered.x + 12, dimensions.width - 200),
-              top: hovered.y,
-              borderColor: SESSION_COLORS[hovered.id]?.main,
-            }}
-          >
-            <div className="flex items-center gap-2 mb-1.5">
-              <div className="h-2.5 w-2.5 rounded-full" style={{ backgroundColor: SESSION_COLORS[hovered.id]?.main }} />
-              <span className="text-xs font-bold">{hovered.name} Session</span>
-              <span className={`text-[10px] font-bold px-1.5 py-0.5 rounded-full ${hovered.active ? "bg-success/15 text-success" : "bg-destructive/15 text-destructive"}`}>
-                {hovered.active ? "OPEN" : "CLOSED"}
-              </span>
-            </div>
-            <p className="text-[10px] text-muted-foreground mb-1">
-              {hovered.open} — {hovered.close} (local)
-            </p>
-            <p className="text-[10px] text-muted-foreground">
-              Pairs: {hovered.pairs.join(", ")}
-            </p>
-          </div>
+            {/* Glow filter */}
+            <defs>
+              <filter id="session-glow">
+                <feGaussianBlur stdDeviation="4" />
+              </filter>
+            </defs>
+          </svg>
         )}
       </div>
 
@@ -285,11 +206,12 @@ export function SessionChart({ timezone }: SessionChartProps) {
       <div className="px-5 pb-4 flex flex-wrap justify-center gap-4">
         {FOREX_SESSIONS.map((s) => {
           const active = isSessionActive(s, now);
+          const color = SESSION_COLORS[s.id] || SESSION_COLORS.tokyo;
           return (
             <div key={s.id} className="flex items-center gap-1.5">
               <div
                 className={`h-2.5 w-2.5 rounded-full ${active ? "animate-pulse" : ""}`}
-                style={{ backgroundColor: SESSION_COLORS[s.id].main, opacity: active ? 1 : 0.4 }}
+                style={{ backgroundColor: color.main, opacity: active ? 1 : 0.4 }}
               />
               <span className="text-[10px] text-muted-foreground font-medium">{s.name}</span>
             </div>

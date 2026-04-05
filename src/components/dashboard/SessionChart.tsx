@@ -44,7 +44,7 @@ export function SessionChart({ timezone }: { timezone: string }) {
   // Use a fallback width if container hasn't reported yet
   const effectiveWidth = width > 0 ? width : 700;
 
-  const chartW = width - PADDING.left - PADDING.right;
+  const chartW = effectiveWidth - PADDING.left - PADDING.right;
   const svgH = PADDING.top + FOREX_SESSIONS.length * (BAR_HEIGHT + BAR_GAP) - BAR_GAP + PADDING.bottom;
 
   const toX = (min: number) => PADDING.left + (min / TOTAL_MINUTES) * chartW;

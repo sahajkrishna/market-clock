@@ -17,6 +17,7 @@ import { AlertPanel } from "@/components/dashboard/AlertPanel";
 import { CustomizePanel } from "@/components/dashboard/CustomizePanel";
 import { AppSidebar } from "@/components/dashboard/AppSidebar";
 import { MarketModeSwitch } from "@/components/dashboard/MarketModeSwitch";
+import { MarketStructureBadge } from "@/components/dashboard/MarketStructureBadge";
 import type { MarketMode } from "@/lib/preferences";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -188,7 +189,10 @@ const Dashboard = () => {
                   );
                 case "tradingView":
                   return (
-                    <section key={section.id} className="animate-fade-in">
+                    <section key={section.id} className="animate-fade-in space-y-2">
+                      <div className="flex items-center justify-end">
+                        <MarketStructureBadge />
+                      </div>
                       <div style={{ height: "600px" }}>
                         <TradingViewWidget />
                       </div>

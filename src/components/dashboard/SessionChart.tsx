@@ -17,7 +17,8 @@ const TOTAL_MINUTES = 24 * 60;
 export function SessionChart({ timezone }: { timezone: string }) {
   const [now, setNow] = useState(new Date());
   const containerRef = useRef<HTMLDivElement>(null);
-  const [width, setWidth] = useState(700);
+  const [width, setWidth] = useState(0);
+  const [mounted, setMounted] = useState(false);
 
   useEffect(() => {
     const interval = setInterval(() => setNow(new Date()), 1000);
@@ -25,16 +26,23 @@ export function SessionChart({ timezone }: { timezone: string }) {
   }, []);
 
   useEffect(() => {
+    setMounted(true);
     const el = containerRef.current;
     if (!el) return;
-    const obs = new ResizeObserver((entries) => {
-      const w = entries[0]?.contentRect.width;
-      if (w && w > 0) setWidth(w);
-    });
+    const measure = () => {
+      const w = el.clientWidth;
+      if (w > 0) setWidth(w);
+    };
+    measure();
+    const obs = new ResizeObserver(() => measure());
     obs.observe(el);
-    setWidth(el.clientWidth || 700);
-    return () => obs.disconnect();
+    // Fallback: re-measure after a short delay in case initial width is 0
+    const timeout = setTimeout(measure, 100);
+    return () => { obs.disconnect(); clearTimeout(timeout); };
   }, []);
+
+  // Use a fallback width if container hasn't reported yet
+  const effectiveWidth = width > 0 ? width : 700;
 
   const chartW = width - PADDING.left - PADDING.right;
   const svgH = PADDING.top + FOREX_SESSIONS.length * (BAR_HEIGHT + BAR_GAP) - BAR_GAP + PADDING.bottom;

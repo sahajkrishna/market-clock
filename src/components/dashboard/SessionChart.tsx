@@ -77,8 +77,8 @@ export function SessionChart({ timezone }: { timezone: string }) {
 
       {/* Chart */}
       <div ref={containerRef} className="flex-1 relative px-2 pb-2" style={{ minHeight: `${svgH + 8}px` }}>
-        {chartW > 10 && (
-          <svg width={width} height={svgH} style={{ display: "block", overflow: "visible" }}>
+        {chartW > 0 && (
+          <svg width={effectiveWidth} height={svgH} style={{ display: "block", overflow: "visible" }}>
             {/* Grid lines */}
             {hours.map((h) => {
               const x = toX(h * 60);

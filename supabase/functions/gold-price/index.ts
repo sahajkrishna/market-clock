@@ -25,6 +25,15 @@ serve(async (req) => {
     return new Response(null, { headers: corsHeaders });
   }
 
+  // Require the Supabase anon key to prevent unauthorized external access
+  const clientApiKey = req.headers.get("apikey");
+  if (!clientApiKey) {
+    return new Response(
+      JSON.stringify({ error: "Unauthorized" }),
+      { status: 401, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+    );
+  }
+
   const apiKey = Deno.env.get("TWELVE_DATA_API_KEY");
   if (!apiKey) {
     return new Response(

@@ -1,9 +1,7 @@
 import { useState, useEffect, useCallback, useRef } from "react";
-import { supabase } from "@/integrations/supabase/client";
 import { FOREX_SESSIONS, isSessionActive } from "@/lib/forex-sessions";
 import { Brain, RefreshCw, Sparkles } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { useToast } from "@/hooks/use-toast";
 
 interface MarketInterpreterProps {
   now: Date;

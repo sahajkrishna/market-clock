@@ -72,6 +72,7 @@ export function MarketInterpreter({ now }: MarketInterpreterProps) {
   const [loading, setLoading] = useState(false);
   const [lastUpdated, setLastUpdated] = useState<Date | null>(null);
   const [error, setError] = useState<string | null>(null);
+  const [creditsExhausted, setCreditsExhausted] = useState(false);
   const { toast } = useToast();
   const intervalRef = useRef<ReturnType<typeof setInterval>>();
 

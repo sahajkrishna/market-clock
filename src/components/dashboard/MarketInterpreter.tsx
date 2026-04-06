@@ -77,6 +77,7 @@ export function MarketInterpreter({ now }: MarketInterpreterProps) {
   const intervalRef = useRef<ReturnType<typeof setInterval>>();
 
   const fetchInsights = useCallback(async () => {
+    if (creditsExhausted) return; // Don't keep polling if credits are gone
     setLoading(true);
     setError(null);
 
@@ -91,11 +92,20 @@ export function MarketInterpreter({ now }: MarketInterpreterProps) {
         body: { activeSessions, overlaps, upcomingEvents, timeOfDay, utcHour },
       });
 
-      if (fnError) throw fnError;
+      if (fnError) {
+        // Check if the error message indicates credits exhausted
+        const errMsg = fnError.message || String(fnError);
+        if (errMsg.includes("402") || errMsg.includes("credits")) {
+          setCreditsExhausted(true);
+        }
+        throw fnError;
+      }
 
       if (data?.error) {
-        // On 402 or other API errors, use static fallback insights
         console.warn("Market interpreter API error, using fallback:", data.error);
+        if (String(data.error).includes("credits") || String(data.error).includes("402")) {
+          setCreditsExhausted(true);
+        }
         const fallback = getStaticInsights(activeSessions, utcHour);
         setInsights(fallback);
         setLastUpdated(new Date());
@@ -113,7 +123,7 @@ export function MarketInterpreter({ now }: MarketInterpreterProps) {
     } finally {
       setLoading(false);
     }
-  }, [toast]);
+  }, [toast, creditsExhausted]);
 
   // Fetch on mount and every 60 seconds
   useEffect(() => {

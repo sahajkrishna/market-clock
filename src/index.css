@@ -174,8 +174,9 @@
   /* Glassmorphism card */
   .glass-card {
     @apply rounded-2xl border backdrop-blur-xl;
-    background: hsl(var(--card) / 0.6);
-    border-color: hsl(var(--border) / 0.5);
+    background: hsl(var(--card) / 0.85);
+    border-color: hsl(var(--border) / 0.6);
+    box-shadow: 0 1px 3px 0 hsl(0 0% 0% / 0.06), 0 1px 2px -1px hsl(0 0% 0% / 0.06);
   }
 
   .dark .glass-card {
@@ -186,23 +187,38 @@
 
   /* Neon glow borders */
   .glow-green {
+    box-shadow: 0 0 15px -5px hsl(var(--neon-green) / 0.15);
+  }
+  .dark .glow-green {
     box-shadow: 0 0 20px -5px hsl(var(--neon-green) / 0.3), 0 0 40px -10px hsl(var(--neon-green) / 0.15);
   }
 
   .glow-red {
+    box-shadow: 0 0 15px -5px hsl(var(--neon-red) / 0.15);
+  }
+  .dark .glow-red {
     box-shadow: 0 0 20px -5px hsl(var(--neon-red) / 0.3), 0 0 40px -10px hsl(var(--neon-red) / 0.15);
   }
 
   .glow-blue {
+    box-shadow: 0 0 15px -5px hsl(var(--neon-blue) / 0.15);
+  }
+  .dark .glow-blue {
     box-shadow: 0 0 20px -5px hsl(var(--neon-blue) / 0.3), 0 0 40px -10px hsl(var(--neon-blue) / 0.15);
   }
 
   .glow-gold {
+    box-shadow: 0 0 15px -5px hsl(var(--neon-gold) / 0.15);
+  }
+  .dark .glow-gold {
     box-shadow: 0 0 20px -5px hsl(var(--neon-gold) / 0.3), 0 0 40px -10px hsl(var(--neon-gold) / 0.15);
   }
 
   /* Gradient background */
   .bg-gradient-main {
+    background: linear-gradient(160deg, hsl(var(--background)) 0%, hsl(220 20% 95%) 40%, hsl(220 14% 93%) 100%);
+  }
+  .dark .bg-gradient-main {
     background: linear-gradient(160deg, hsl(222 30% 6%) 0%, hsl(222 40% 10%) 40%, hsl(230 35% 12%) 100%);
   }
 

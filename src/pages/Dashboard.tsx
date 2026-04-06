@@ -94,7 +94,7 @@ const Dashboard = () => {
     <SidebarProvider>
       <div className="min-h-screen flex w-full bg-gradient-main">
         {/* Ambient background effects */}
-        <div className="fixed inset-0 pointer-events-none overflow-hidden z-0">
+        <div className="fixed inset-0 pointer-events-none overflow-hidden z-0 dark:block hidden">
           <div className="absolute top-0 left-1/4 w-[600px] h-[600px] rounded-full bg-primary/[0.03] blur-[120px]" />
           <div className="absolute bottom-1/4 right-1/4 w-[400px] h-[400px] rounded-full bg-neon-blue/[0.03] blur-[100px]" />
         </div>

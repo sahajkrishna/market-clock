@@ -76,54 +76,15 @@ export function MarketInterpreter({ now }: MarketInterpreterProps) {
   const { toast } = useToast();
   const intervalRef = useRef<ReturnType<typeof setInterval>>();
 
-  const fetchInsights = useCallback(async () => {
-    if (creditsExhausted) return; // Don't keep polling if credits are gone
+  const fetchInsights = useCallback(() => {
     setLoading(true);
-    setError(null);
-
     const utcHour = new Date().getUTCHours();
     const activeSessions = FOREX_SESSIONS.filter((s) => isSessionActive(s, new Date())).map((s) => s.name);
-    const overlaps = getOverlaps(activeSessions);
-    const timeOfDay = getTimeOfDay(utcHour);
-    const upcomingEvents = getMockUpcomingEvents();
-
-    try {
-      const { data, error: fnError } = await supabase.functions.invoke("market-interpreter", {
-        body: { activeSessions, overlaps, upcomingEvents, timeOfDay, utcHour },
-      });
-
-      if (fnError) {
-        // Check if the error message indicates credits exhausted
-        const errMsg = fnError.message || String(fnError);
-        if (errMsg.includes("402") || errMsg.includes("credits")) {
-          setCreditsExhausted(true);
-        }
-        throw fnError;
-      }
-
-      if (data?.error) {
-        console.warn("Market interpreter API error, using fallback:", data.error);
-        if (String(data.error).includes("credits") || String(data.error).includes("402")) {
-          setCreditsExhausted(true);
-        }
-        const fallback = getStaticInsights(activeSessions, utcHour);
-        setInsights(fallback);
-        setLastUpdated(new Date());
-        setError("AI unavailable — showing rule-based insights");
-      } else if (data?.insights) {
-        setInsights(data.insights);
-        setLastUpdated(new Date());
-      }
-    } catch (e) {
-      console.warn("Market interpreter fetch error, using fallback:", e);
-      const fallback = getStaticInsights(activeSessions, utcHour);
-      setInsights(fallback);
-      setLastUpdated(new Date());
-      setError("AI unavailable — showing rule-based insights");
-    } finally {
-      setLoading(false);
-    }
-  }, [toast, creditsExhausted]);
+    const fallback = getStaticInsights(activeSessions, utcHour);
+    setInsights(fallback);
+    setLastUpdated(new Date());
+    setLoading(false);
+  }, []);
 
   // Fetch on mount and every 60 seconds
   useEffect(() => {

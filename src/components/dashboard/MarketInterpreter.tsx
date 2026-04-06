@@ -93,16 +93,22 @@ export function MarketInterpreter({ now }: MarketInterpreterProps) {
       if (fnError) throw fnError;
 
       if (data?.error) {
-        setError(data.error);
-        toast({ title: data.error, variant: "destructive" });
+        // On 402 or other API errors, use static fallback insights
+        console.warn("Market interpreter API error, using fallback:", data.error);
+        const fallback = getStaticInsights(activeSessions, utcHour);
+        setInsights(fallback);
+        setLastUpdated(new Date());
+        setError("AI unavailable — showing rule-based insights");
       } else if (data?.insights) {
         setInsights(data.insights);
         setLastUpdated(new Date());
       }
     } catch (e) {
-      const msg = e instanceof Error ? e.message : "Failed to fetch insights";
-      setError(msg);
-      console.error("Market interpreter error:", e);
+      console.warn("Market interpreter fetch error, using fallback:", e);
+      const fallback = getStaticInsights(activeSessions, utcHour);
+      setInsights(fallback);
+      setLastUpdated(new Date());
+      setError("AI unavailable — showing rule-based insights");
     } finally {
       setLoading(false);
     }

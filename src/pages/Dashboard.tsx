@@ -194,7 +194,7 @@ const Dashboard = () => {
                         <MarketStructureBadge />
                       </div>
                       <div style={{ height: "600px" }}>
-                        <TradingViewWidget />
+                        <TradingViewWidget marketMode={prefs.marketMode ?? "swing"} />
                       </div>
                     </section>
                   );
@@ -239,7 +239,7 @@ const Dashboard = () => {
                 case "economicCalendar":
                   return (
                     <section key={section.id} id="economicCalendar" className="animate-fade-in">
-                      <EconomicCalendar />
+                      <EconomicCalendar marketMode={prefs.marketMode ?? "swing"} />
                     </section>
                   );
                 case "marketInterpreter":

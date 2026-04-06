@@ -143,7 +143,8 @@ export function EconomicCalendar({ marketMode = "swing" }: EconomicCalendarProps
           <div>
             <p className="text-sm font-semibold tracking-tight">Economic Calendar</p>
             <p className="text-[10px] text-muted-foreground uppercase tracking-wider">
-              Upcoming Events
+              {marketMode === "scalper" ? "High Impact · Next 2 Hours" : "Upcoming Events"}
+            </p>
             </p>
           </div>
         </div>

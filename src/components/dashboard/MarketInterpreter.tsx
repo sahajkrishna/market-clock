@@ -29,6 +29,32 @@ function getOverlaps(active: string[]): string[] {
 }
 
 // Simple mock upcoming events for context
+function getStaticInsights(activeSessions: string[], utcHour: number): string[] {
+  const insights: string[] = [];
+  if (activeSessions.length === 0) {
+    insights.push("⏰ Markets are in off-hours — low liquidity expected, wider spreads likely.");
+    insights.push("🟡 Avoid trading during low-volume periods unless scalping.");
+  } else {
+    insights.push(`🟢 ${activeSessions.join(" & ")} session${activeSessions.length > 1 ? "s" : ""} active — liquidity is available.`);
+  }
+  if (activeSessions.includes("New York") && activeSessions.includes("London")) {
+    insights.push("📊 London-New York overlap — historically the highest volatility window for EUR/USD and GBP/USD.");
+  }
+  if (activeSessions.includes("Tokyo") && activeSessions.includes("London")) {
+    insights.push("📊 Tokyo-London overlap — watch for JPY and EUR pairs.");
+  }
+  if (utcHour >= 13 && utcHour <= 15) {
+    insights.push("⏰ US economic data releases often happen around this time — check the calendar.");
+  }
+  if (activeSessions.includes("Tokyo")) {
+    insights.push("🟡 Asian session tends to be range-bound — best for JPY and AUD pairs.");
+  }
+  if (activeSessions.includes("New York") && utcHour >= 20) {
+    insights.push("🟡 New York session winding down — volatility typically decreasing.");
+  }
+  return insights.slice(0, 5);
+}
+
 function getMockUpcomingEvents() {
   const events = [
     { currency: "USD", event: "Core CPI", impact: "High" },
@@ -67,16 +93,22 @@ export function MarketInterpreter({ now }: MarketInterpreterProps) {
       if (fnError) throw fnError;
 
       if (data?.error) {
-        setError(data.error);
-        toast({ title: data.error, variant: "destructive" });
+        // On 402 or other API errors, use static fallback insights
+        console.warn("Market interpreter API error, using fallback:", data.error);
+        const fallback = getStaticInsights(activeSessions, utcHour);
+        setInsights(fallback);
+        setLastUpdated(new Date());
+        setError("AI unavailable — showing rule-based insights");
       } else if (data?.insights) {
         setInsights(data.insights);
         setLastUpdated(new Date());
       }
     } catch (e) {
-      const msg = e instanceof Error ? e.message : "Failed to fetch insights";
-      setError(msg);
-      console.error("Market interpreter error:", e);
+      console.warn("Market interpreter fetch error, using fallback:", e);
+      const fallback = getStaticInsights(activeSessions, utcHour);
+      setInsights(fallback);
+      setLastUpdated(new Date());
+      setError("AI unavailable — showing rule-based insights");
     } finally {
       setLoading(false);
     }

@@ -190,7 +190,10 @@ const Dashboard = () => {
                 case "tradingView":
                   return (
                     <section key={section.id} className="animate-fade-in space-y-2">
-                      <div className="flex items-center justify-end">
+                      <div className="flex items-center justify-between">
+                        <Badge variant="outline" className="text-[10px] px-2 py-0.5">
+                          {(prefs.marketMode ?? "swing") === "scalper" ? "Short-term focus" : "Long-term focus"}
+                        </Badge>
                         <MarketStructureBadge />
                       </div>
                       <div style={{ height: "600px" }}>

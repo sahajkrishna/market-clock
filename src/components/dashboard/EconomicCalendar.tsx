@@ -43,7 +43,11 @@ const IMPACT_CONFIG = {
 
 const CURRENCIES = ["USD", "EUR", "GBP", "JPY", "AUD", "CAD", "CHF", "NZD"];
 
-export function EconomicCalendar() {
+interface EconomicCalendarProps {
+  marketMode?: "scalper" | "swing" | "news";
+}
+
+export function EconomicCalendar({ marketMode = "swing" }: EconomicCalendarProps) {
   const [events, setEvents] = useState<EconomicEvent[]>([]);
   const [loading, setLoading] = useState(true);
   const [impactFilter, setImpactFilter] = useState<Set<string>>(new Set(["high", "medium", "low"]));
@@ -86,13 +90,23 @@ export function EconomicCalendar() {
     });
   };
 
-  const filtered = useMemo(
-    () =>
-      events.filter(
-        (e) => impactFilter.has(e.impact) && currencyFilter.has(e.currency)
-      ),
-    [events, impactFilter, currencyFilter]
-  );
+  const filtered = useMemo(() => {
+    let result = events.filter(
+      (e) => impactFilter.has(e.impact) && currencyFilter.has(e.currency)
+    );
+
+    if (marketMode === "scalper") {
+      // Scalper: only high impact events within next 2 hours
+      const now = new Date();
+      const twoHoursLater = new Date(now.getTime() + 2 * 60 * 60 * 1000);
+      result = result.filter(
+        (e) => e.impact === "high" && new Date(e.time) >= now && new Date(e.time) <= twoHoursLater
+      );
+    }
+    // Swing: show all (default behavior)
+
+    return result;
+  }, [events, impactFilter, currencyFilter, marketMode]);
 
   // Group events by date
   const grouped = useMemo(() => {
@@ -129,7 +143,7 @@ export function EconomicCalendar() {
           <div>
             <p className="text-sm font-semibold tracking-tight">Economic Calendar</p>
             <p className="text-[10px] text-muted-foreground uppercase tracking-wider">
-              Upcoming Events
+              {marketMode === "scalper" ? "High Impact · Next 2 Hours" : "Upcoming Events"}
             </p>
           </div>
         </div>

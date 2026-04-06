@@ -1,11 +1,17 @@
 import { useEffect, useRef } from "react";
 
+import type { MarketMode } from "@/lib/preferences";
+
 interface TradingViewWidgetProps {
   symbol?: string;
+  marketMode?: MarketMode;
 }
 
-export const TradingViewWidget = ({ symbol = "OANDA:XAUUSD" }: TradingViewWidgetProps) => {
+export const TradingViewWidget = ({ symbol = "OANDA:XAUUSD", marketMode = "swing" }: TradingViewWidgetProps) => {
   const containerRef = useRef<HTMLDivElement>(null);
+
+  // Scalper = M5/M15, Swing = H1/H4
+  const interval = marketMode === "scalper" ? "5" : "60";
 
   useEffect(() => {
     const container = containerRef.current;
@@ -22,7 +28,7 @@ export const TradingViewWidget = ({ symbol = "OANDA:XAUUSD" }: TradingViewWidget
       width: "100%",
       height: "100%",
       locale: "en",
-      interval: "15",
+      interval,
       timezone: "Etc/UTC",
       theme: "dark",
       style: "1",
@@ -41,7 +47,7 @@ export const TradingViewWidget = ({ symbol = "OANDA:XAUUSD" }: TradingViewWidget
     return () => {
       if (container) container.innerHTML = "";
     };
-  }, [symbol]);
+  }, [symbol, interval]);
 
   return (
     <div className="glass-card rounded-2xl overflow-hidden glow-gold h-full flex flex-col">
@@ -52,7 +58,9 @@ export const TradingViewWidget = ({ symbol = "OANDA:XAUUSD" }: TradingViewWidget
           </div>
           <div>
             <p className="text-sm font-semibold tracking-tight">XAUUSD · Gold</p>
-            <p className="text-[10px] text-muted-foreground uppercase tracking-wider">Live Chart</p>
+            <p className="text-[10px] text-muted-foreground uppercase tracking-wider">
+              {marketMode === "scalper" ? "M5 · Short-term focus" : "H1 · Long-term focus"}
+            </p>
           </div>
         </div>
       </div>

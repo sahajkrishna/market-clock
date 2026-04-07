@@ -1,6 +1,6 @@
 import { useState, useCallback } from "react";
 
-export type SectionId = "insights" | "tradingView" | "chart" | "marketCards" | "nextSession" | "economicCalendar" | "marketInterpreter";
+export type SectionId = "insights" | "tradeDecision" | "tradingView" | "chart" | "marketCards" | "nextSession" | "economicCalendar" | "marketInterpreter";
 
 export interface DashboardSection {
   id: SectionId;
@@ -12,6 +12,7 @@ const STORAGE_KEY = "dashboard_layout";
 
 const DEFAULT_SECTIONS: DashboardSection[] = [
   { id: "insights", label: "Insights Panel", enabled: true },
+  { id: "tradeDecision", label: "Trade Decision", enabled: true },
   { id: "tradingView", label: "XAUUSD Live Chart", enabled: true },
   { id: "chart", label: "Session Chart", enabled: true },
   { id: "marketCards", label: "Market Cards", enabled: true },

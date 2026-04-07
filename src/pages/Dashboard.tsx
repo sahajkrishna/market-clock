@@ -18,6 +18,7 @@ import { CustomizePanel } from "@/components/dashboard/CustomizePanel";
 import { AppSidebar } from "@/components/dashboard/AppSidebar";
 import { MarketModeSwitch } from "@/components/dashboard/MarketModeSwitch";
 import { MarketStructureBadge } from "@/components/dashboard/MarketStructureBadge";
+import { TradeDecisionEngine } from "@/components/dashboard/TradeDecisionEngine";
 import type { MarketMode } from "@/lib/preferences";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -185,6 +186,12 @@ const Dashboard = () => {
                   return (
                     <section key={section.id} className="animate-fade-in">
                       <InsightsEngine now={now} />
+                    </section>
+                  );
+                case "tradeDecision":
+                  return (
+                    <section key={section.id} className="animate-fade-in">
+                      <TradeDecisionEngine now={now} />
                     </section>
                   );
                 case "tradingView":

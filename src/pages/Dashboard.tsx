@@ -166,7 +166,7 @@ const Dashboard = () => {
                 <LiveClock timezone={prefs.timezone} />
               </div>
               <div className="animate-fade-in" style={{ animationDelay: "0.15s" }}>
-                <ActiveSessionBanner now={now} />
+                <ActiveSessionBanner now={now} marketMode={prefs.marketMode ?? "swing"} />
               </div>
             </section>
 
@@ -185,7 +185,7 @@ const Dashboard = () => {
                 case "insights":
                   return (
                     <section key={section.id} className="animate-fade-in">
-                      <InsightsEngine now={now} />
+                      <InsightsEngine now={now} marketMode={prefs.marketMode ?? "swing"} />
                     </section>
                   );
                 case "tradeDecision":

@@ -166,7 +166,7 @@ const Dashboard = () => {
                 <LiveClock timezone={prefs.timezone} />
               </div>
               <div className="animate-fade-in" style={{ animationDelay: "0.15s" }}>
-                <ActiveSessionBanner now={now} />
+                <ActiveSessionBanner now={now} marketMode={prefs.marketMode ?? "swing"} />
               </div>
             </section>
 

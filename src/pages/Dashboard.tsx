@@ -185,7 +185,7 @@ const Dashboard = () => {
                 case "insights":
                   return (
                     <section key={section.id} className="animate-fade-in">
-                      <InsightsEngine now={now} />
+                      <InsightsEngine now={now} marketMode={prefs.marketMode ?? "swing"} />
                     </section>
                   );
                 case "tradeDecision":

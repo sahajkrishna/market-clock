@@ -1,73 +1,74 @@
-# Welcome to your Lovable project
+# Market Clock — Global Trading Session Dashboard
 
-## Project info
+> Never miss a market open again. Real-time tracking of global trading sessions across all major time zones.
 
-**URL**: https://lovable.dev/projects/REPLACE_WITH_PROJECT_ID
+🔗 **Live App:** [market-clock.lovable.app](https://market-clock.lovable.app)
 
-## How can I edit this code?
+---
 
-There are several ways of editing your application.
+## Overview
 
-**Use Lovable**
+Market Clock was built out of a personal need — as an active Forex (XAUUSD) trader, keeping track of global market sessions across time zones is a daily requirement. Most existing tools are cluttered, paid, or overkill. This dashboard gives traders a clean, real-time view of exactly which markets are open, closed, or opening soon.
 
-Simply visit the [Lovable Project](https://lovable.dev/projects/REPLACE_WITH_PROJECT_ID) and start prompting.
+Built and deployed solo as part of the Applied GenAI cohort at **100x**.
 
-Changes made via Lovable will be committed automatically to this repo.
+---
 
-**Use your preferred IDE**
+## Features
 
-If you want to work locally using your own IDE, you can clone this repo and push changes. Pushed changes will also be reflected in Lovable.
+- Real-time tracking of major global market sessions:
+  - 🇺🇸 New York (NYSE / NASDAQ)
+  - 🇬🇧 London (LSE)
+  - 🇯🇵 Tokyo (TSE)
+  - 🌐 Forex (24hr sessions)
+- Live open / closed / upcoming session indicators
+- Automatic timezone detection and conversion
+- Minimal, distraction-free UI built for active traders
+- Mobile responsive
 
-The only requirement is having Node.js & npm installed - [install with nvm](https://github.com/nvm-sh/nvm#installing-and-updating)
+---
 
-Follow these steps:
+## Tech Stack
 
-```sh
-# Step 1: Clone the repository using the project's Git URL.
-git clone <YOUR_GIT_URL>
+| Layer | Tool |
+|-------|------|
+| Frontend / Builder | Lovable (React) |
+| Deployment | Vercel / Lovable Hosting |
 
-# Step 2: Navigate to the project directory.
-cd <YOUR_PROJECT_NAME>
+---
 
-# Step 3: Install the necessary dependencies.
-npm i
+## Who Is This For
 
-# Step 4: Start the development server with auto-reloading and an instant preview.
+- Forex traders tracking XAUUSD, currency pairs, and metals
+- Equity traders monitoring US, UK, and Asian markets
+- Anyone who needs to know what's open right now without digging through Google
+
+---
+
+## Screenshots
+
+> _Add screenshots of the dashboard with active session indicators here._
+
+---
+
+## Getting Started
+
+This project was built with [Lovable](https://lovable.dev) and exported to GitHub.
+
+To run locally:
+
+```bash
+npm install
 npm run dev
 ```
 
-**Edit a file directly in GitHub**
+To deploy:
+- Push to GitHub → auto-deploys via Vercel
 
-- Navigate to the desired file(s).
-- Click the "Edit" button (pencil icon) at the top right of the file view.
-- Make your changes and commit the changes.
+---
 
-**Use GitHub Codespaces**
+## About the Builder
 
-- Navigate to the main page of your repository.
-- Click on the "Code" button (green button) near the top right.
-- Select the "Codespaces" tab.
-- Click on "New codespace" to launch a new Codespace environment.
-- Edit files directly within the Codespace and commit and push your changes once you're done.
+Built by **Krishna Sahaj D V** — MBA graduate, AI builder, and active Forex trader with 4+ years of XAUUSD intraday trading experience.
 
-## What technologies are used for this project?
-
-This project is built with:
-
-- Vite
-- TypeScript
-- React
-- shadcn-ui
-- Tailwind CSS
-
-## How can I deploy this project?
-
-Simply open [Lovable](https://lovable.dev/projects/REPLACE_WITH_PROJECT_ID) and click on Share -> Publish.
-
-## Can I connect a custom domain to my Lovable project?
-
-Yes, you can!
-
-To connect a domain, navigate to Project > Settings > Domains and click Connect Domain.
-
-Read more here: [Setting up a custom domain](https://docs.lovable.dev/features/custom-domain#custom-domain)
+🔗 [LinkedIn](https://www.linkedin.com/in/krishna-sahaj-d-v-7b623b190) • [GitHub](https://github.com/sahajkrishna)

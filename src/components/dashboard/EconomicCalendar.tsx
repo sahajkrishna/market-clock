@@ -43,6 +43,23 @@ const IMPACT_CONFIG = {
 
 const CURRENCIES = ["USD", "EUR", "GBP", "JPY", "AUD", "CAD", "CHF", "NZD"];
 
+const COUNTRY_TO_CURRENCY: Record<string, string> = {
+  US: "USD",
+  EU: "EUR",
+  EA: "EUR",
+  EZ: "EUR",
+  GB: "GBP",
+  UK: "GBP",
+  JP: "JPY",
+  AU: "AUD",
+  CA: "CAD",
+  CH: "CHF",
+  NZ: "NZD",
+};
+
+const normalizeCurrency = (currency: string) =>
+  COUNTRY_TO_CURRENCY[currency.toUpperCase()] ?? currency.toUpperCase();
+
 interface EconomicCalendarProps {
   marketMode?: "scalper" | "swing" | "news";
 }
@@ -59,7 +76,12 @@ export function EconomicCalendar({ marketMode = "swing" }: EconomicCalendarProps
       const { data, error } = await supabase.functions.invoke("economic-calendar");
       if (error) throw error;
       if (data?.success && data.data) {
-        setEvents(data.data);
+        setEvents(
+          data.data.map((event: EconomicEvent) => ({
+            ...event,
+            currency: normalizeCurrency(event.currency),
+          }))
+        );
       }
     } catch (err) {
       console.error("Failed to fetch economic calendar:", err);
@@ -92,7 +114,7 @@ export function EconomicCalendar({ marketMode = "swing" }: EconomicCalendarProps
 
   const filtered = useMemo(() => {
     let result = events.filter(
-      (e) => impactFilter.has(e.impact) && currencyFilter.has(e.currency)
+      (e) => impactFilter.has(e.impact) && currencyFilter.has(normalizeCurrency(e.currency))
     );
 
     if (marketMode === "scalper") {

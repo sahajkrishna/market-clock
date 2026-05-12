@@ -50,7 +50,7 @@ interface EconomicCalendarProps {
 export function EconomicCalendar({ marketMode = "swing" }: EconomicCalendarProps) {
   const [events, setEvents] = useState<EconomicEvent[]>([]);
   const [loading, setLoading] = useState(true);
-  const [impactFilter, setImpactFilter] = useState<Set<string>>(new Set(["high", "medium", "low"]));
+  const [impactFilter, setImpactFilter] = useState<Set<string>>(new Set(["high", "medium"]));
   const [currencyFilter, setCurrencyFilter] = useState<Set<string>>(new Set(CURRENCIES));
 
   const fetchEvents = async () => {

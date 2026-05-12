@@ -15,6 +15,25 @@ interface EconomicEvent {
   actual: string | null;
 }
 
+const COUNTRY_TO_CURRENCY: Record<string, string> = {
+  US: "USD",
+  EU: "EUR",
+  EA: "EUR",
+  EZ: "EUR",
+  GB: "GBP",
+  UK: "GBP",
+  JP: "JPY",
+  AU: "AUD",
+  CA: "CAD",
+  CH: "CHF",
+  NZ: "NZD",
+};
+
+function normalizeCurrency(raw: unknown): string {
+  const code = String(raw ?? "").trim().toUpperCase();
+  return COUNTRY_TO_CURRENCY[code] ?? code;
+}
+
 // Map Finnhub impact (numeric or string) to our levels.
 // Finnhub returns "impact" as one of: "low", "medium", "high" (sometimes empty).
 function normalizeImpact(raw: unknown): "high" | "medium" | "low" {
@@ -65,7 +84,7 @@ async function fetchFinnhubCalendar(apiKey: string): Promise<EconomicEvent[]> {
       return {
         id: `${e.country ?? "X"}-${e.event}-${e.time}-${idx}`,
         time: iso,
-        currency: String(e.country ?? "").toUpperCase(),
+        currency: normalizeCurrency(e.currency ?? e.country),
         event: String(e.event),
         impact: normalizeImpact(e.impact),
         previous: fmt(e.prev),

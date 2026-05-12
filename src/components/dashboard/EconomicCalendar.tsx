@@ -159,7 +159,7 @@ export function EconomicCalendar({ marketMode = "swing" }: EconomicCalendarProps
               </Button>
             </DropdownMenuTrigger>
             <DropdownMenuContent align="end" className="w-36">
-              {(["high", "medium", "low"] as const).map((level) => (
+              {(["high", "medium"] as const).map((level) => (
                 <DropdownMenuCheckboxItem
                   key={level}
                   checked={impactFilter.has(level)}
